@@ -49,8 +49,12 @@ jobs:
 
     - name: Copy history into results
       run: |
-        mkdir -p TestResults/$ALLURE_ENV/history
-        cp -r history/* TestResults/$ALLURE_ENV/history/ || true
+        if [ -d "history" ]; then
+          mkdir -p TestResults/$ALLURE_ENV/history
+          cp -r history/* TestResults/$ALLURE_ENV/history/ || true
+        else
+          echo "No history found, skipping copy."
+        fi
 
     - name: Generate Allure Report
       run: |
