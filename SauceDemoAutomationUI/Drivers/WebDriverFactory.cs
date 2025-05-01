@@ -19,7 +19,7 @@ namespace SauceDemoAutomationUI.Drivers
             switch (browser.ToLower())
             {
                 case "chrome":
-                    new DriverManager().SetUpDriver(new ChromeConfig());
+                    new DriverManager().SetUpDriver(new ChromeConfig(), version: "Latest");
                     var chromeOptions = new ChromeOptions();
                     if (isCi)
                     {
