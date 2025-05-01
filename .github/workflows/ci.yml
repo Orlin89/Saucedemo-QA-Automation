@@ -28,13 +28,6 @@ jobs:
     - name: Set ALLURE_ENV
       run: echo "ALLURE_ENV=CI" >> $GITHUB_ENV
 
-    - name: Download previous Allure history
-      continue-on-error: true
-      uses: actions/download-artifact@v4
-      with:
-        name: allure-history
-        path: history
-
     - name: Run UI Tests
       run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed"
 
@@ -47,14 +40,20 @@ jobs:
         cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/$ALLURE_ENV || true
         cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/$ALLURE_ENV || true
 
+    - name: Download previous Allure history
+      id: download_history
+      continue-on-error: true
+      uses: actions/download-artifact@v4
+      with:
+        name: allure-history
+        path: history
+
     - name: Copy history into results
+      if: steps.download_history.outcome == 'success'
       run: |
-        if [ -d "history" ]; then
-          mkdir -p TestResults/$ALLURE_ENV/history
-          cp -r history/* TestResults/$ALLURE_ENV/history/ || true
-        else
-          echo "No history found, skipping copy."
-        fi
+        echo "Previous history found. Copying..."
+        mkdir -p TestResults/$ALLURE_ENV/history
+        cp -r history/* TestResults/$ALLURE_ENV/history/ || true
 
     - name: Generate Allure Report
       run: |
