@@ -1,0 +1,64 @@
+{
+  "uuid": "547574cc-92be-44a0-b995-e55f61ff2bf0",
+  "historyId": "ddfa29276a8245d15a643bd8227c77c3",
+  "testCaseId": "7e11542baa6bcd5227fb8730ea4ef8af",
+  "fullName": "SauceDemoAutomationAPI:SauceDemoAutomationAPI.Tests.LoginApiTests.Login_WithValidUser_ShouldReturnSuccess()",
+  "labels": [
+    {
+      "name": "thread",
+      "value": "NonParallelWorker"
+    },
+    {
+      "name": "host",
+      "value": "DESKTOP-LIAJB90"
+    },
+    {
+      "name": "language",
+      "value": "C#"
+    },
+    {
+      "name": "framework",
+      "value": "NUnit 3"
+    },
+    {
+      "name": "package",
+      "value": "SauceDemoAutomationAPI.Tests"
+    },
+    {
+      "name": "testMethod",
+      "value": "Login_WithValidUser_ShouldReturnSuccess"
+    },
+    {
+      "name": "testClass",
+      "value": "LoginApiTests"
+    },
+    {
+      "name": "tag",
+      "value": "API"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "owner",
+      "value": "Automation"
+    }
+  ],
+  "links": [],
+  "name": "Login_WithValidUser_ShouldReturnSuccess",
+  "status": "failed",
+  "statusDetails": {
+    "known": false,
+    "muted": false,
+    "flaky": false,
+    "message": "  Expected: True\r\n  But was:  False\r\n",
+    "trace": "   at SauceDemoAutomationAPI.Tests.LoginApiTests.Login_WithValidUser_ShouldReturnSuccess() in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationAPI\\Tests\\LoginApiTests.cs:line 28\r\n"
+  },
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "start": 1745862771690,
+  "stop": 1745862771705
+}

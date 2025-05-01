@@ -1,0 +1,57 @@
+{
+  "uuid": "16b2087c-cf78-486c-a525-1a7bbcf77c3e",
+  "historyId": "02807e195edac4a0b53f603f317aeac9",
+  "testCaseId": "90bcf56577042e9ff6ded230d0015120",
+  "fullName": "SauceDemoAutomationUI:SauceDemoAutomationUI.Tests.CartTests.AddItemToCart_ShouldAppearInCart()",
+  "labels": [
+    {
+      "name": "thread",
+      "value": "NonParallelWorker"
+    },
+    {
+      "name": "host",
+      "value": "DESKTOP-LIAJB90"
+    },
+    {
+      "name": "language",
+      "value": "C#"
+    },
+    {
+      "name": "framework",
+      "value": "NUnit 3"
+    },
+    {
+      "name": "package",
+      "value": "SauceDemoAutomationUI.Tests"
+    },
+    {
+      "name": "testMethod",
+      "value": "AddItemToCart_ShouldAppearInCart"
+    },
+    {
+      "name": "testClass",
+      "value": "CartTests"
+    },
+    {
+      "name": "tag",
+      "value": "UI"
+    },
+    {
+      "name": "severity",
+      "value": "normal"
+    },
+    {
+      "name": "owner",
+      "value": "Automation"
+    }
+  ],
+  "links": [],
+  "name": "AddItemToCart_ShouldAppearInCart",
+  "status": "passed",
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "start": 1746098785763,
+  "stop": 1746098788554
+}

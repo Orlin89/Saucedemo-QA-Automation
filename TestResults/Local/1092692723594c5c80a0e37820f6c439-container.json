@@ -1,0 +1,12 @@
+{
+  "uuid": "5a971aa0-f117-424e-afd9-fcadbbd23e23",
+  "name": "SauceDemoAutomationUI.Tests.CheckoutTests.CompleteCheckout_ShouldShowThankYouMessage",
+  "children": [
+    "eba76769-00a5-4dd2-861a-dbd543401f1f"
+  ],
+  "befores": [],
+  "afters": [],
+  "links": [],
+  "start": 1746106504846,
+  "stop": 1746106507452
+}

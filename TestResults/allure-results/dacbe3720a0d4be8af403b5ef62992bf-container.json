@@ -1,0 +1,12 @@
+{
+  "uuid": "e5dca96d-e52e-4b9e-a619-bfdb941c47a1",
+  "name": "SauceDemoAutomationAPI.Tests.LoginApiTests.Login_WithInvalidUser_ShouldReturnUnauthorized",
+  "children": [
+    "3ed17832-af78-49c8-bac0-dd977f17414d"
+  ],
+  "befores": [],
+  "afters": [],
+  "links": [],
+  "start": 1745862771320,
+  "stop": 1745862771685
+}

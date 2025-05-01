@@ -1,0 +1,64 @@
+{
+  "uuid": "6cf05111-d42d-4547-b6c6-721831e4c4d4",
+  "historyId": "45f4e90c84ec4c5b97aff80529c17d10",
+  "testCaseId": "9237f059b5dc8ec9f7cc264dec2fd277",
+  "fullName": "SauceDemoAutomationUI:SauceDemoAutomationUI.Tests.CheckoutTests.CompleteCheckout_ShouldShowThankYouMessage()",
+  "labels": [
+    {
+      "name": "thread",
+      "value": "NonParallelWorker"
+    },
+    {
+      "name": "host",
+      "value": "DESKTOP-LIAJB90"
+    },
+    {
+      "name": "language",
+      "value": "C#"
+    },
+    {
+      "name": "framework",
+      "value": "NUnit 3"
+    },
+    {
+      "name": "package",
+      "value": "SauceDemoAutomationUI.Tests"
+    },
+    {
+      "name": "testMethod",
+      "value": "CompleteCheckout_ShouldShowThankYouMessage"
+    },
+    {
+      "name": "testClass",
+      "value": "CheckoutTests"
+    },
+    {
+      "name": "tag",
+      "value": "UI"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "owner",
+      "value": "Automation"
+    }
+  ],
+  "links": [],
+  "name": "CompleteCheckout_ShouldShowThankYouMessage",
+  "status": "broken",
+  "statusDetails": {
+    "known": false,
+    "muted": false,
+    "flaky": false,
+    "message": "OpenQA.Selenium.NoSuchElementException : no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"#checkout\"}\n  (Session info: chrome=135.0.7049.115); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception",
+    "trace": "   at OpenQA.Selenium.WebDriver.UnpackAndThrowOnError(Response errorResponse, String commandToExecute)\r\n   at OpenQA.Selenium.WebDriver.Execute(String driverCommandToExecute, Dictionary`2 parameters)\r\n   at OpenQA.Selenium.WebDriver.FindElement(String mechanism, String value)\r\n   at OpenQA.Selenium.By.<.ctor>b__11_0(ISearchContext context)\r\n   at OpenQA.Selenium.By.FindElement(ISearchContext context)\r\n   at OpenQA.Selenium.WebDriver.FindElement(By by)\r\n   at SauceDemoAutomationUI.Pages.CartPage.get_CheckoutButton() in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationUI\\Pages\\CartPage.cs:line 9\r\n   at SauceDemoAutomationUI.Pages.CartPage.ClickCheckout() in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationUI\\Pages\\CartPage.cs:line 18\r\n   at SauceDemoAutomationUI.Tests.CheckoutTests.CompleteCheckout_ShouldShowThankYouMessage() in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationUI\\Tests\\CheckoutTests.cs:line 29\r\n   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)"
+  },
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "start": 1745864329668,
+  "stop": 1745864332023
+}

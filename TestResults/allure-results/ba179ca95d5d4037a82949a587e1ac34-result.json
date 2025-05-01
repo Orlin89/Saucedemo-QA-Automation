@@ -1,0 +1,57 @@
+{
+  "uuid": "59e774d2-3f81-4ed0-983f-61e409e6d64b",
+  "historyId": "0f293d57822b15216b88cda8b2ac5e63",
+  "testCaseId": "1b2c8dd43ed6bca32cc53d03dc5056c1",
+  "fullName": "SauceDemoAutomationUI:SauceDemoAutomationUI.Tests.LoginTests.StandardUserLogin_ShouldSucceed()",
+  "labels": [
+    {
+      "name": "thread",
+      "value": "NonParallelWorker"
+    },
+    {
+      "name": "host",
+      "value": "DESKTOP-LIAJB90"
+    },
+    {
+      "name": "language",
+      "value": "C#"
+    },
+    {
+      "name": "framework",
+      "value": "NUnit 3"
+    },
+    {
+      "name": "package",
+      "value": "SauceDemoAutomationUI.Tests"
+    },
+    {
+      "name": "testMethod",
+      "value": "StandardUserLogin_ShouldSucceed"
+    },
+    {
+      "name": "testClass",
+      "value": "LoginTests"
+    },
+    {
+      "name": "tag",
+      "value": "UI"
+    },
+    {
+      "name": "severity",
+      "value": "critical"
+    },
+    {
+      "name": "owner",
+      "value": "Automation"
+    }
+  ],
+  "links": [],
+  "name": "StandardUserLogin_ShouldSucceed",
+  "status": "passed",
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "start": 1746098791542,
+  "stop": 1746098794127
+}

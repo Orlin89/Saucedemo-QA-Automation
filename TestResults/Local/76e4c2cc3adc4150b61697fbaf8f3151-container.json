@@ -1,0 +1,12 @@
+{
+  "uuid": "9f28cbf8-804b-4d71-a382-f4b378829514",
+  "name": "SauceDemoAutomationUI.Tests.LoginTests",
+  "children": [
+    "106b9ce1-66f7-4b12-971e-6348e9cb95bd"
+  ],
+  "befores": [],
+  "afters": [],
+  "links": [],
+  "start": 1745867140829,
+  "stop": 1745867143059
+}

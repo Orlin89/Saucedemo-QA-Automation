@@ -1,0 +1,17 @@
+{
+  "allure": {
+    "directory": "TestResults/${ALLURE_ENV}",
+    "clean": true,
+    "reportDirectory": "AllureReport",
+    "links": {
+      "issue": {
+        "pattern": "https://your-issue-tracker.com/browse/{}",
+        "type": "issue"
+      },
+      "tms": {
+        "pattern": "https://your-tms.com/tests/{}",
+        "type": "tms"
+      }
+    }
+  }
+}

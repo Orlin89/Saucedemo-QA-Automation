@@ -1,0 +1,12 @@
+{
+  "uuid": "cd356a78-b221-41d5-bd08-ec8562f2eb0b",
+  "name": "SauceDemoAutomationUI.Tests.CartTests",
+  "children": [
+    "9b9ade31-7913-46fe-b8c2-96cf6e1aa114"
+  ],
+  "befores": [],
+  "afters": [],
+  "links": [],
+  "start": 1746101322661,
+  "stop": 1746101325709
+}

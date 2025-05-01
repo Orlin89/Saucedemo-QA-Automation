@@ -1,0 +1,64 @@
+{
+  "uuid": "7bf3dc9a-363d-4585-83a7-c32a5325e986",
+  "historyId": "45f4e90c84ec4c5b97aff80529c17d10",
+  "testCaseId": "9237f059b5dc8ec9f7cc264dec2fd277",
+  "fullName": "SauceDemoAutomationUI:SauceDemoAutomationUI.Tests.CheckoutTests.CompleteCheckout_ShouldShowThankYouMessage()",
+  "labels": [
+    {
+      "name": "thread",
+      "value": "NonParallelWorker"
+    },
+    {
+      "name": "host",
+      "value": "DESKTOP-LIAJB90"
+    },
+    {
+      "name": "language",
+      "value": "C#"
+    },
+    {
+      "name": "framework",
+      "value": "NUnit 3"
+    },
+    {
+      "name": "package",
+      "value": "SauceDemoAutomationUI.Tests"
+    },
+    {
+      "name": "testMethod",
+      "value": "CompleteCheckout_ShouldShowThankYouMessage"
+    },
+    {
+      "name": "testClass",
+      "value": "CheckoutTests"
+    },
+    {
+      "name": "tag",
+      "value": "UI"
+    },
+    {
+      "name": "severity",
+      "value": "blocker"
+    },
+    {
+      "name": "owner",
+      "value": "Automation"
+    }
+  ],
+  "links": [],
+  "name": "CompleteCheckout_ShouldShowThankYouMessage",
+  "status": "broken",
+  "statusDetails": {
+    "known": false,
+    "muted": false,
+    "flaky": false,
+    "message": "System.InvalidOperationException : session not created: This version of ChromeDriver only supports Chrome version 114\nCurrent browser version is 135.0.7049.115 with binary path C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe (SessionNotCreated)",
+    "trace": "   at OpenQA.Selenium.WebDriver.UnpackAndThrowOnError(Response errorResponse, String commandToExecute)\r\n   at OpenQA.Selenium.WebDriver.Execute(String driverCommandToExecute, Dictionary`2 parameters)\r\n   at OpenQA.Selenium.WebDriver.StartSession(ICapabilities capabilities)\r\n   at OpenQA.Selenium.WebDriver..ctor(ICommandExecutor executor, ICapabilities capabilities)\r\n   at OpenQA.Selenium.Chromium.ChromiumDriver..ctor(ChromiumDriverService service, ChromiumOptions options, TimeSpan commandTimeout)\r\n   at OpenQA.Selenium.Chrome.ChromeDriver..ctor(ChromeDriverService service, ChromeOptions options, TimeSpan commandTimeout)\r\n   at OpenQA.Selenium.Chrome.ChromeDriver..ctor(ChromeOptions options)\r\n   at OpenQA.Selenium.Chrome.ChromeDriver..ctor()\r\n   at SauceDemoAutomationUI.Drivers.WebDriverFactory.CreateDriver(String browser) in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationUI\\Drivers\\WebDriverFactory.cs:line 20\r\n   at SauceDemoAutomationUI.Tests.BaseTest.SetUp() in B:\\GitHub-Repositories\\New folder (2)\\SauceDemoAutomationSolution\\SauceDemoAutomationUI\\Tests\\BaseTest.cs:line 16\r\n   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)"
+  },
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "start": 1745862123675,
+  "stop": 1745862125257
+}
