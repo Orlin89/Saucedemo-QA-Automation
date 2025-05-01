@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using SauceDemoAutomationAPI.Clients;
-using NUnit.Allure.Attributes;
+using Allure.NUnit.Attributes;
 using NUnit.Allure.Core;
 using Allure.Net.Commons;
 

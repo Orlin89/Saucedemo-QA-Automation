@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using SauceDemoAutomationUI.Pages;
 using SauceDemoAutomationUI.Utilities;
-using NUnit.Allure.Attributes;
+using Allure.NUnit.Attributes;
 using NUnit.Allure.Core;
 using Allure.Net.Commons;
 
