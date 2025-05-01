@@ -7,7 +7,7 @@ using Allure.Net.Commons;
 namespace SauceDemoAutomationAPI.Tests
 {
     [TestFixture]
-    [AllureNUnit]
+    [Allure.NUnit.AllureNUnit]
     public class LoginApiTests
     {
         private LoginApiClient _loginApiClient;

@@ -8,7 +8,7 @@ using Allure.Net.Commons;
 namespace SauceDemoAutomationUI.Tests
 {
     [TestFixture]
-    [AllureNUnit]
+    [Allure.NUnit.AllureNUnit]
     public class CartTests : BaseTest
     {
         [Test]
