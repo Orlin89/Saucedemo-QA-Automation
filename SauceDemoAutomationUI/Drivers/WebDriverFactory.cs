@@ -18,15 +18,7 @@ namespace SauceDemoAutomationUI.Drivers
             switch (browser.ToLower())
             {
                 case "chrome":
-                    var chromeVersion = Environment.GetEnvironmentVariable("CHROME_VERSION");
-                    if (!string.IsNullOrEmpty(chromeVersion))
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), chromeVersion);
-                    }
-                    else
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig());
-                    }
+                    new DriverManager().SetUpDriver(new ChromeConfig());
                     var chromeOptions = new ChromeOptions();
                     if (isCi)
                     {
@@ -38,16 +30,8 @@ namespace SauceDemoAutomationUI.Drivers
                     driver = new ChromeDriver(chromeOptions);
                     break;
 
-                case "firefox":
-                    var firefoxVersion = Environment.GetEnvironmentVariable("FIREFOX_VERSION");
-                    if (!string.IsNullOrEmpty(firefoxVersion))
-                    {
-                        new DriverManager().SetUpDriver(new FirefoxConfig(), firefoxVersion);
-                    }
-                    else
-                    {
-                        new DriverManager().SetUpDriver(new FirefoxConfig());
-                    }
+                case "firefox":                 
+                    new DriverManager().SetUpDriver(new FirefoxConfig());
                     var firefoxOptions = new FirefoxOptions();
                     if (isCi)
                     {
@@ -57,15 +41,7 @@ namespace SauceDemoAutomationUI.Drivers
                     break;
 
                 case "edge":
-                    var edgeVersion = Environment.GetEnvironmentVariable("EDGE_VERSION");
-                    if (!string.IsNullOrEmpty(edgeVersion))
-                    {
-                        new DriverManager().SetUpDriver(new EdgeConfig(), edgeVersion);
-                    }
-                    else
-                    {
-                        new DriverManager().SetUpDriver(new EdgeConfig());
-                    }
+                    new DriverManager().SetUpDriver(new EdgeConfig());
                     var edgeOptions = new EdgeOptions();
                     if (isCi)
                     {
