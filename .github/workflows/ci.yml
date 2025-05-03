@@ -28,6 +28,12 @@ jobs:
     - name: Set ALLURE_ENV
       run: echo "ALLURE_ENV=CI" >> $GITHUB_ENV
 
+    - name: Get browser versions from system
+      run: |
+        echo "CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+\\.\\d+')" >> $GITHUB_ENV
+        echo "FIREFOX_VERSION=$(firefox --version | grep -oP '\\d+\\.\\d+')" >> $GITHUB_ENV
+        echo "EDGE_VERSION=$(microsoft-edge --version | grep -oP '\\d+\\.\\d+\\.\\d+\\.\\d+')" >> $GITHUB_ENV
+
     - name: Run UI Tests
       run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed"
 

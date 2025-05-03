@@ -19,7 +19,8 @@ namespace SauceDemoAutomationUI.Drivers
             switch (browser.ToLower())
             {
                 case "chrome":
-                    new DriverManager().SetUpDriver(new ChromeConfig());
+                    var chromeVersion = Environment.GetEnvironmentVariable("CHROME_VERSION") ?? "latest";
+                    new DriverManager().SetUpDriver(new ChromeConfig(), chromeVersion);
                     var chromeOptions = new ChromeOptions();
                     if (isCi)
                     {
@@ -32,7 +33,8 @@ namespace SauceDemoAutomationUI.Drivers
                     break;
 
                 case "firefox":
-                    new DriverManager().SetUpDriver(new FirefoxConfig());
+                    var firefoxVersion = Environment.GetEnvironmentVariable("FIREFOX_VERSION") ?? "latest";
+                    new DriverManager().SetUpDriver(new FirefoxConfig(), firefoxVersion);
                     var firefoxOptions = new FirefoxOptions();
                     if (isCi)
                     {
@@ -42,7 +44,8 @@ namespace SauceDemoAutomationUI.Drivers
                     break;
 
                 case "edge":
-                    new DriverManager().SetUpDriver(new EdgeConfig());
+                    var edgeVersion = Environment.GetEnvironmentVariable("EDGE_VERSION") ?? "latest";
+                    new DriverManager().SetUpDriver(new EdgeConfig(), edgeVersion);
                     var edgeOptions = new EdgeOptions();
                     if (isCi)
                     {
