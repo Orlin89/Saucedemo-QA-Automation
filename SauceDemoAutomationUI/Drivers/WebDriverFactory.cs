@@ -2,8 +2,6 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Edge;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
 using System;
 
 namespace SauceDemoAutomationUI.Drivers
@@ -18,7 +16,6 @@ namespace SauceDemoAutomationUI.Drivers
             switch (browser.ToLower())
             {
                 case "chrome":
-                    new DriverManager().SetUpDriver(new ChromeConfig());
                     var chromeOptions = new ChromeOptions();
                     if (isCi)
                     {
@@ -26,29 +23,42 @@ namespace SauceDemoAutomationUI.Drivers
                         chromeOptions.AddArgument("--no-sandbox");
                         chromeOptions.AddArgument("--disable-dev-shm-usage");
                         chromeOptions.AddArgument("--disable-gpu");
+                        driver = new ChromeDriver("/usr/local/bin", chromeOptions);
                     }
-                    driver = new ChromeDriver(chromeOptions);
+                    else
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new WebDriverManager.DriverConfigs.Impl.ChromeConfig());
+                        driver = new ChromeDriver(chromeOptions);
+                    }
                     break;
 
-                case "firefox":                 
-                    new DriverManager().SetUpDriver(new FirefoxConfig());
+                case "firefox":
                     var firefoxOptions = new FirefoxOptions();
                     if (isCi)
                     {
                         firefoxOptions.AddArgument("--headless");
+                        driver = new FirefoxDriver("/usr/local/bin", firefoxOptions); 
                     }
-                    driver = new FirefoxDriver(firefoxOptions);
+                    else
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new WebDriverManager.DriverConfigs.Impl.FirefoxConfig());
+                        driver = new FirefoxDriver(firefoxOptions);
+                    }
                     break;
 
                 case "edge":
-                    new DriverManager().SetUpDriver(new EdgeConfig());
                     var edgeOptions = new EdgeOptions();
                     if (isCi)
                     {
                         edgeOptions.AddArgument("headless");
                         edgeOptions.AddArgument("disable-gpu");
+                        driver = new EdgeDriver("/usr/local/bin", edgeOptions);
                     }
-                    driver = new EdgeDriver(edgeOptions);
+                    else
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new WebDriverManager.DriverConfigs.Impl.EdgeConfig());
+                        driver = new EdgeDriver(edgeOptions);
+                    }
                     break;
 
                 default:
