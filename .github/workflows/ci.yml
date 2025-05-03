@@ -30,9 +30,10 @@ jobs:
 
     - name: Install ChromeDriver to match Chrome
       run: |
-        CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
-        echo "Installing ChromeDriver version $CHROME_MAJOR_VERSION"
-        wget -q -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chromedriver-linux64.zip
+        echo "Chrome version: $CHROME_VERSION"
+        CHROME_MAJOR_VERSION=$(echo "$CHROME_VERSION" | cut -d'.' -f1)
+        echo "Installing ChromeDriver version $CHROME_VERSION (major: $CHROME_MAJOR_VERSION)"
+        wget -q -O /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chromedriver-linux64.zip"
         unzip -q /tmp/chromedriver.zip -d /tmp/chromedriver
         sudo mv /tmp/chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
         sudo chmod +x /usr/local/bin/chromedriver
@@ -40,25 +41,20 @@ jobs:
     - name: Install latest GeckoDriver (Firefox)
       run: |
         GECKO_VER=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | jq -r '.tag_name')
-        wget -q -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/$GECKO_VER/geckodriver-$GECKO_VER-linux64.tar.gz
+        wget -q -O /tmp/geckodriver.tar.gz "https://github.com/mozilla/geckodriver/releases/download/$GECKO_VER/geckodriver-$GECKO_VER-linux64.tar.gz"
         tar -xzf /tmp/geckodriver.tar.gz -C /tmp
         sudo mv /tmp/geckodriver /usr/local/bin/geckodriver
         sudo chmod +x /usr/local/bin/geckodriver
 
     - name: Install EdgeDriver to match Edge
       run: |
-        EDGE_MAJOR_VERSION=$(echo $EDGE_VERSION | cut -d'.' -f1)
-        echo "Installing EdgeDriver for version $EDGE_MAJOR_VERSION"
+        echo "Edge version: $EDGE_VERSION"
+        EDGE_MAJOR_VERSION=$(echo "$EDGE_VERSION" | cut -d'.' -f1)
+        echo "Installing EdgeDriver version $EDGE_VERSION"
         wget -q -O /tmp/edgedriver.zip "https://msedgedriver.azureedge.net/$EDGE_VERSION/edgedriver_linux64.zip"
         unzip -q /tmp/edgedriver.zip -d /tmp/edgedriver
         sudo mv /tmp/edgedriver/msedgedriver /usr/local/bin/msedgedriver
         sudo chmod +x /usr/local/bin/msedgedriver
-
-    - name: Debug browser versions
-      run: |
-        echo "Chrome version: $CHROME_VERSION"
-        echo "Firefox version: $FIREFOX_VERSION"
-        echo "Edge version: $EDGE_VERSION"
 
     - name: Build project
       run: dotnet build --no-restore
