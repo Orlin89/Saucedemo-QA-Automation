@@ -13,18 +13,20 @@ namespace SauceDemoAutomationUI.Drivers
         public static IWebDriver CreateDriver(string browser)
         {
             IWebDriver driver;
-
             bool isCi = Environment.GetEnvironmentVariable("CI") == "true";
 
             switch (browser.ToLower())
             {
                 case "chrome":
                     var chromeVersion = Environment.GetEnvironmentVariable("CHROME_VERSION");
-                    if (string.IsNullOrEmpty(chromeVersion))
+                    if (!string.IsNullOrEmpty(chromeVersion))
                     {
-                        chromeVersion = "latest";
+                        new DriverManager().SetUpDriver(new ChromeConfig(), chromeVersion);
                     }
-                    new DriverManager().SetUpDriver(new ChromeConfig(), chromeVersion);
+                    else
+                    {
+                        new DriverManager().SetUpDriver(new ChromeConfig());
+                    }
                     var chromeOptions = new ChromeOptions();
                     if (isCi)
                     {
@@ -38,11 +40,14 @@ namespace SauceDemoAutomationUI.Drivers
 
                 case "firefox":
                     var firefoxVersion = Environment.GetEnvironmentVariable("FIREFOX_VERSION");
-                    if (string.IsNullOrEmpty(firefoxVersion))
+                    if (!string.IsNullOrEmpty(firefoxVersion))
                     {
-                        firefoxVersion = "latest";
+                        new DriverManager().SetUpDriver(new FirefoxConfig(), firefoxVersion);
                     }
-                    new DriverManager().SetUpDriver(new FirefoxConfig(), firefoxVersion);
+                    else
+                    {
+                        new DriverManager().SetUpDriver(new FirefoxConfig());
+                    }
                     var firefoxOptions = new FirefoxOptions();
                     if (isCi)
                     {
@@ -53,11 +58,14 @@ namespace SauceDemoAutomationUI.Drivers
 
                 case "edge":
                     var edgeVersion = Environment.GetEnvironmentVariable("EDGE_VERSION");
-                    if (string.IsNullOrEmpty(edgeVersion))
+                    if (!string.IsNullOrEmpty(edgeVersion))
                     {
-                        edgeVersion = "latest";
+                        new DriverManager().SetUpDriver(new EdgeConfig(), edgeVersion);
                     }
-                    new DriverManager().SetUpDriver(new EdgeConfig(), edgeVersion);
+                    else
+                    {
+                        new DriverManager().SetUpDriver(new EdgeConfig());
+                    }
                     var edgeOptions = new EdgeOptions();
                     if (isCi)
                     {
