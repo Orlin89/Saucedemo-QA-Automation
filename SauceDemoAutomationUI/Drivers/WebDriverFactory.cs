@@ -13,7 +13,6 @@ namespace SauceDemoAutomationUI.Drivers
         public static IWebDriver CreateDriver(string browser)
         {
             IWebDriver driver;
-
             bool isCi = Environment.GetEnvironmentVariable("CI") == "true";
 
             switch (browser.ToLower())
@@ -31,7 +30,7 @@ namespace SauceDemoAutomationUI.Drivers
                     driver = new ChromeDriver(chromeOptions);
                     break;
 
-                case "firefox":
+                case "firefox":                 
                     new DriverManager().SetUpDriver(new FirefoxConfig());
                     var firefoxOptions = new FirefoxOptions();
                     if (isCi)
