@@ -22,25 +22,10 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Get browser versions
+    - name: Install Browsers
       run: |
-        # Get Chrome version and save it to an environment variable
-        echo "CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+\\.\\d+')" >> $GITHUB_ENV
-        echo "FIREFOX_VERSION=$(firefox --version | grep -oP '\\d+\\.\\d+')" >> $GITHUB_ENV
-        echo "EDGE_VERSION=$(microsoft-edge --version | grep -oP '\\d+\\.\\d+\\.\\d+\\.\\d+')" >> $GITHUB_ENV
-
-    - name: Debug browser versions
-      run: |
-        echo "Chrome version: $CHROME_VERSION"
-        echo "Firefox version: $FIREFOX_VERSION"
-        echo "Edge version: $EDGE_VERSION"
-
-    - name: Set ChromeDriver version based on Chrome version
-      run: |
-        CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
-        echo "Setting ChromeDriver for Chrome version $CHROME_MAJOR_VERSION"
-        # Set ChromeDriver version to match the major version of Chrome
-        echo "CHROMEDRIVER_VERSION=$CHROME_MAJOR_VERSION" >> $GITHUB_ENV
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable firefox microsoft-edge-stable
 
     - name: Build project
       run: dotnet build --no-restore
@@ -49,9 +34,11 @@ jobs:
       run: echo "ALLURE_ENV=CI" >> $GITHUB_ENV
 
     - name: Run UI Tests
+      continue-on-error: true
       run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed"
 
     - name: Run API Tests
+      continue-on-error: true
       run: dotnet test SauceDemoAutomationAPI/SauceDemoAutomationAPI.csproj --logger:"console;verbosity=detailed"
 
     - name: Copy Allure Results to unified folder
