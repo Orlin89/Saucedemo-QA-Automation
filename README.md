@@ -68,6 +68,14 @@ CI/CD pipeline will automatically:
 
 ---
 
+## 📊 Allure Report
+
+Latest Allure Report is automatically published with every CI run.
+
+🔗 [View Allure Report on GitHub Pages](https://orlin89.github.io/Saucedemo-QA-Automation/allure/)
+
+---
+
 ## 🚀 Parallel Execution
 
 - Chrome, Firefox, and Edge browsers are supported.
