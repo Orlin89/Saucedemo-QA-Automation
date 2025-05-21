@@ -1,22 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/allure-framework/allure-csharp/2.12.1/Allure.Net.Commons/Schemas/allureConfig.schema.json",
   "allure": {
-    "directory": "TestResults/${ALLURE_ENV}",
+    "directory": "TestResults",
     "clean": true,
     "reportDirectory": "AllureReport",
-    "links": {
-      "issue": [
-        {
-          "url": "https://your-issue-tracker.com/browse/{}",
-          "type": "issue"
-        }
-      ],
-      "tms": [
-        {
-          "url": "https://your-tms.com/tests/{}",
-          "type": "tms"
-        }
-      ]
-    }
+    "links": [
+      "https://your-issue-tracker.com/browse/{}",
+      "https://your-tms.com/tests/{}"
+    ]
   }
 }
+

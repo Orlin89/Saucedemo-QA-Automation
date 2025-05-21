@@ -30,9 +30,6 @@ jobs:
     - name: Build project
       run: dotnet build --no-restore
 
-    - name: Set ALLURE_ENV
-      run: echo "ALLURE_ENV=CI" >> $GITHUB_ENV
-
     - name: Run UI Tests
       continue-on-error: true
       run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed"
@@ -43,9 +40,9 @@ jobs:
 
     - name: Copy Allure Results to unified folder
       run: |
-        mkdir -p TestResults/$ALLURE_ENV
-        cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/$ALLURE_ENV || true
-        cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/$ALLURE_ENV || true
+        mkdir -p TestResults/AllureResults
+        cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
+        cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
 
     - name: Download previous Allure history
       id: download_history
@@ -59,13 +56,13 @@ jobs:
       if: steps.download_history.outcome == 'success'
       run: |
         echo "Previous history found. Copying..."
-        mkdir -p TestResults/$ALLURE_ENV/history
-        cp -r history/* TestResults/$ALLURE_ENV/history/ || true
+        mkdir -p TestResults/AllureResults/history
+        cp -r history/* TestResults/AllureResults/history/ || true
 
     - name: Generate Allure Report
       run: |
         npm install -g allure-commandline --save-dev
-        allure generate TestResults/$ALLURE_ENV --clean -o AllureReport
+        allure generate TestResults/AllureResults --clean -o AllureReport
 
     - name: Upload Allure Report
       uses: actions/upload-artifact@v4
