@@ -44,33 +44,29 @@ jobs:
         cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
         cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
 
-    - name: Download previous Allure history
-      id: download_history
-      continue-on-error: true
-      uses: actions/download-artifact@v4
-      with:
-        name: allure-history
-        path: history
-
-    - name: Copy history into results
-      if: steps.download_history.outcome == 'success'
+    # Нови стъпки: клонираме gh-pages и взимаме history
+    - name: Clone gh-pages branch to get previous Allure history
       run: |
-        echo "Previous history found. Copying..."
+        git clone --depth 1 --branch gh-pages https://github.com/${{ github.repository }} gh-pages
         mkdir -p TestResults/AllureResults/history
-        cp -r history/* TestResults/AllureResults/history/ || true
+        if [ -d "gh-pages/allure/history" ]; then
+          cp -r gh-pages/allure/history/* TestResults/AllureResults/history/ || true
+        else
+          echo "No previous history found"
+        fi
 
     - name: Generate Allure Report
       run: |
         npm install -g allure-commandline --save-dev
         allure generate TestResults/AllureResults --clean -o AllureReport
 
-    - name: Upload Allure Report
+    - name: Upload Allure Report as artifact
       uses: actions/upload-artifact@v4
       with:
         name: allure-report
         path: AllureReport
 
-    - name: Upload Allure history
+    - name: Upload Allure history as artifact
       uses: actions/upload-artifact@v4
       with:
         name: allure-history
