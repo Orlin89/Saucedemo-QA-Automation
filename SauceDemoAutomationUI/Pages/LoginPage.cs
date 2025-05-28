@@ -2,26 +2,33 @@
 
 namespace SauceDemoAutomationUI.Pages
 {
-    public class LoginPage
+    public class LoginPage : BasePage
     {
-        private readonly IWebDriver _driver;
+        public LoginPage(IWebDriver driver) : base(driver) { }
 
-        private IWebElement UsernameInput => _driver.FindElement(By.Id("user-name"));
-        private IWebElement PasswordInput => _driver.FindElement(By.Id("password"));
-        private IWebElement LoginButton => _driver.FindElement(By.Id("login-button"));
+        private readonly By usernameField = By.Id("user-name");
+        private readonly By passwordField = By.Id("password");
+        private readonly By loginButton = By.Id("login-button");
+        private readonly By errorMessage = By.XPath("//div[@class='error-message-container error']");
 
-        public LoginPage(IWebDriver driver)
+        public void InputUsername(string username)
         {
-            _driver = driver;
+            Type(usernameField, username);
         }
 
-        public void Login(string username, string password)
+        public void InputPassword(string password)
         {
-            UsernameInput.Clear();
-            UsernameInput.SendKeys(username);
-            PasswordInput.Clear();
-            PasswordInput.SendKeys(password);
-            LoginButton.Click();
+            Type(passwordField, password);
+        }
+
+        public void ClickLoginButton()
+        {
+            Click(loginButton);
+        }
+
+        public string GetErrorMessage()
+        {
+            return GetText(errorMessage);
         }
     }
 }

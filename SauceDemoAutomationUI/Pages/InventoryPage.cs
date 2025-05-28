@@ -2,24 +2,41 @@
 
 namespace SauceDemoAutomationUI.Pages
 {
-    public class InventoryPage
+    public class InventoryPage : BasePage
     {
-        private readonly IWebDriver _driver;
-        private IWebElement CartButton => _driver.FindElement(By.Id("shopping_cart_container"));
+        public InventoryPage(IWebDriver driver) : base(driver) { }
 
-        public InventoryPage(IWebDriver driver)
+        private readonly By cartLinkElement = By.XPath("//a[@class='shopping_cart_link']");
+
+        private readonly By productsTitle = By.XPath("//span[@class='title']");
+
+        private readonly By inventoryItems = By.XPath("//div[@class='inventory_item']");
+
+        public void AddToCartByIndex(int index)
         {
-            _driver = driver;
+            By itemAddToCartButton = By.XPath($"(//div[@class='inventory_item'])[{index}]//button");
+            Click(itemAddToCartButton);
         }
 
-        public void AddItemToCart(string itemName)
+        public void AddToCartByName(string name)
         {
-            _driver.FindElement(By.XPath($"//div[text()='{itemName}']/ancestor::div[@class='inventory_item']//button")).Click();
+            By itemAddToCart = By.XPath($"//div[text()='{name}']/ancestor::div[@class='inventory_item']//button");
+            Click(itemAddToCart);
         }
 
-        public void GoToCart()
+        public void ClickCartLink()
         {
-            CartButton.Click();
+            Click(cartLinkElement);
+        }
+
+        public bool IsINventoryDisplayed()
+        {
+            return FindElements(inventoryItems).Any();
+        }
+
+        public bool IsPageLoaded()
+        {
+            return GetText(productsTitle) == "Products" && driver.Url.Contains("inventory.html");
         }
     }
 }

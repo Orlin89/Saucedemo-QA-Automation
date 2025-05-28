@@ -20,6 +20,7 @@ namespace SauceDemoAutomationUI.Drivers
                 case "chrome":
                     new DriverManager().SetUpDriver(new ChromeConfig());
                     var chromeOptions = new ChromeOptions();
+
                     if (isCi)
                     {
                         chromeOptions.AddArgument("--headless=new");
@@ -27,27 +28,38 @@ namespace SauceDemoAutomationUI.Drivers
                         chromeOptions.AddArgument("--disable-dev-shm-usage");
                         chromeOptions.AddArgument("--disable-gpu");
                     }
+                    else
+                    {
+                        chromeOptions.AddArgument("--incognito");
+                        chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
+                        chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
+                    }
+
                     driver = new ChromeDriver(chromeOptions);
                     break;
 
-                case "firefox":                 
+                case "firefox":
                     new DriverManager().SetUpDriver(new FirefoxConfig());
                     var firefoxOptions = new FirefoxOptions();
+
                     if (isCi)
                     {
                         firefoxOptions.AddArgument("--headless");
                     }
+
                     driver = new FirefoxDriver(firefoxOptions);
                     break;
 
                 case "edge":
                     new DriverManager().SetUpDriver(new EdgeConfig());
                     var edgeOptions = new EdgeOptions();
+
                     if (isCi)
                     {
                         edgeOptions.AddArgument("headless");
                         edgeOptions.AddArgument("disable-gpu");
                     }
+
                     driver = new EdgeDriver(edgeOptions);
                     break;
 
@@ -55,7 +67,10 @@ namespace SauceDemoAutomationUI.Drivers
                     throw new ArgumentException($"Browser not supported: {browser}");
             }
 
+            // Apply common driver settings
             driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
             return driver;
         }
     }

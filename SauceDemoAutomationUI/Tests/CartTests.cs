@@ -7,25 +7,44 @@ using Allure.Net.Commons;
 
 namespace SauceDemoAutomationUI.Tests
 {
-    [TestFixture]
-    [Allure.NUnit.AllureNUnit]
-    public class CartTests : BaseTest
+    [TestFixture("chrome")]
+    [TestFixture("firefox")]
+    [TestFixture("edge")]
+    [AllureNUnit]
+    [Parallelizable(ParallelScope.Self)]
+    public class CartTests : BaseTests
     {
+        public CartTests(string browser) : base(browser) { }
+
+        [SetUp]
+        public void SetUpCartTests()
+        {
+            var (username, password) = UserProvider.GetStandardUser();
+            Login(username, password);
+            var inventoryPage = new InventoryPage(driver);
+            inventoryPage.AddToCartByIndex(2);
+            inventoryPage.ClickCartLink();
+        }
+
         [Test]
         [AllureTag("UI")]
         [AllureSeverity(SeverityLevel.normal)]
         [AllureOwner("Automation")]
-        public void AddItemToCart_ShouldAppearInCart()
+        public void TestCartItemDisplayed()
         {
-            var loginPage = new LoginPage(Driver);
-            var (username, password) = UserProvider.GetStandardUser();
-            loginPage.Login(username, password);
+            var cartPage = new CartPage(driver);
+            Assert.That(cartPage.IsCartItemDisplayed(), Is.True);
+        }
 
-            var inventoryPage = new InventoryPage(Driver);
-            inventoryPage.AddItemToCart("Sauce Labs Backpack");
-            inventoryPage.GoToCart();
-
-            Assert.IsTrue(Driver.PageSource.Contains("Sauce Labs Backpack"));
+        [Test]
+        [AllureTag("UI")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureOwner("Automation")]
+        public void TestClickCheckout()
+        {
+            var cartPage = new CartPage(driver);
+            cartPage.ClickCheckout();
+            Assert.That(driver.Url, Is.EqualTo("https://www.saucedemo.com/checkout-step-one.html"));
         }
     }
 }

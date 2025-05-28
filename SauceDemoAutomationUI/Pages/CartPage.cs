@@ -2,20 +2,22 @@
 
 namespace SauceDemoAutomationUI.Pages
 {
-    public class CartPage
+    public class CartPage : BasePage
     {
-        private readonly IWebDriver _driver;
+        public CartPage(IWebDriver driver) : base(driver) { }
 
-        private IWebElement CheckoutButton => _driver.FindElement(By.Id("checkout"));
+        private readonly By itemsInCart = By.XPath("//div[@class='cart_item']");
 
-        public CartPage(IWebDriver driver)
+        private readonly By checkoutButton = By.Id("checkout");
+
+        public bool IsCartItemDisplayed()
         {
-            _driver = driver;
+            return FindElement(itemsInCart).Displayed;
         }
 
         public void ClickCheckout()
         {
-            CheckoutButton.Click();
+            Click(checkoutButton);
         }
     }
 }

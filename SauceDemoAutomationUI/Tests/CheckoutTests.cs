@@ -7,37 +7,67 @@ using Allure.Net.Commons;
 
 namespace SauceDemoAutomationUI.Tests
 {
-    [TestFixture]
-    [Allure.NUnit.AllureNUnit]
-    public class CheckoutTests : BaseTest
+    [TestFixture("chrome")]
+    [TestFixture("firefox")]
+    [TestFixture("edge")]
+    [AllureNUnit]
+    [Parallelizable(ParallelScope.Self)]
+    public class CheckoutTests : BaseTests
     {
+        public CheckoutTests(string browser) : base(browser) { }
+
+        [SetUp]
+        public void SetUpCheckout()
+        {
+            var (username, password) = UserProvider.GetStandardUser();
+            Login(username, password);
+            var inventoryPage = new InventoryPage(driver);
+            inventoryPage.AddToCartByIndex(3);
+            inventoryPage.ClickCartLink();
+            var cartPage = new CartPage(driver);
+            cartPage.ClickCheckout();
+        }
+
         [Test]
         [AllureTag("UI")]
         [AllureSeverity(SeverityLevel.blocker)]
         [AllureOwner("Automation")]
-        public void CompleteCheckout_ShouldShowThankYouMessage()
+        public void TestCheckoutPageLoaded()
         {
-            var loginPage = new LoginPage(Driver);
-            var (username, password) = UserProvider.GetStandardUser();
-            loginPage.Login(username, password);
+            var checkoutPage = new CheckoutPage(driver);
+            Assert.That(checkoutPage.IsPageLoaded, Is.True);
+        }
 
-            var inventoryPage = new InventoryPage(Driver);
-            inventoryPage.AddItemToCart("Sauce Labs Backpack");
-            inventoryPage.GoToCart();
+        [Test]
+        [AllureTag("UI")]
+        [AllureSeverity(SeverityLevel.blocker)]
+        [AllureOwner("Automation")]
+        public void TestContinueToNextStep()
+        {
+            var checkoutPage = new CheckoutPage(driver);
+            checkoutPage.EnterFirstName("SomeName");
+            checkoutPage.EnterLastName("LastName");
+            checkoutPage.EnterPostalCode("1000");
+            checkoutPage.ClickContinue();
 
-            var cartPage = new CartPage(Driver);
-            cartPage.ClickCheckout();
+            Assert.That(driver.Url, Is.EqualTo("https://www.saucedemo.com/checkout-step-two.html"));
+        }
 
-            var checkoutPage = new CheckoutPage(Driver);
-            checkoutPage.FillCheckoutForm(TestDataProvider.GetFirstName(), TestDataProvider.GetLastName(), TestDataProvider.GetPostalCode());
+        [Test]
+        [AllureTag("UI")]
+        [AllureSeverity(SeverityLevel.blocker)]
+        [AllureOwner("Automation")]
+        public void TestCompleteOrder()
+        {
+            var checkoutPage = new CheckoutPage(driver);
+            checkoutPage.EnterFirstName("SomeName");
+            checkoutPage.EnterLastName("LastName");
+            checkoutPage.EnterPostalCode("1000");
+            checkoutPage.ClickContinue();
+            checkoutPage.ClickFinish();
 
-            var overviewPage = new CheckoutOverviewPage(Driver);
-            overviewPage.ClickFinish();
-
-            var completePage = new CheckoutCompletePage(Driver);
-            var message = completePage.GetThankYouMessage();
-
-            Assert.AreEqual("Thank you for your order!", message);
+            Assert.That(driver.Url, Is.EqualTo("https://www.saucedemo.com/checkout-complete.html"));
+            Assert.That(checkoutPage.IsCheckoutComplete(), Is.True);
         }
     }
 }

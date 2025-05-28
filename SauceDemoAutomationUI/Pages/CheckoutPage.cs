@@ -2,26 +2,51 @@
 
 namespace SauceDemoAutomationUI.Pages
 {
-    public class CheckoutPage
+    public class CheckoutPage : BasePage
     {
-        private readonly IWebDriver _driver;
+        public CheckoutPage(IWebDriver driver) : base(driver) { }
 
-        private IWebElement FirstNameInput => _driver.FindElement(By.Id("first-name"));
-        private IWebElement LastNameInput => _driver.FindElement(By.Id("last-name"));
-        private IWebElement PostalCodeInput => _driver.FindElement(By.Id("postal-code"));
-        private IWebElement ContinueButton => _driver.FindElement(By.Id("continue"));
+        private readonly By FirstNameInput = By.Id("first-name");
+        private readonly By LastNameInput = By.Id("last-name");
+        private readonly By PostalCode = By.Id("postal-code");
+        private readonly By ContinueButton = By.Id("continue");
+        private readonly By FinishButton = By.Id("finish");
+        private readonly By CompletionHeader = By.TagName("h2");
 
-        public CheckoutPage(IWebDriver driver)
+        public void EnterFirstName(string firstName)
         {
-            _driver = driver;
+            Type(FirstNameInput, firstName);
         }
 
-        public void FillCheckoutForm(string firstName, string lastName, string postalCode)
+        public void EnterLastName(string lastName)
         {
-            FirstNameInput.SendKeys(firstName);
-            LastNameInput.SendKeys(lastName);
-            PostalCodeInput.SendKeys(postalCode);
-            ContinueButton.Click();
+            Type(LastNameInput, lastName);
+        }
+
+        public void EnterPostalCode(string postalCode)
+        {
+            Type(PostalCode, postalCode);
+        }
+
+        public void ClickContinue()
+        {
+            Click(ContinueButton);
+        }
+
+        public void ClickFinish()
+        {
+            Click(FinishButton);
+        }
+
+        public bool IsPageLoaded()
+        {
+            return driver.Url.Contains("checkout-step-one.html") ||
+                driver.Url.Contains("checkout-step-two.html");
+        }
+
+        public bool IsCheckoutComplete()
+        {
+            return GetText(CompletionHeader) == "Thank you for your order!";
         }
     }
 }
