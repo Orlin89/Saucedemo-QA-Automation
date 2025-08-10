@@ -56,7 +56,8 @@ jobs:
         rm geckodriver-*.tar.gz
 
         echo "Installing EdgeDriver..."
-        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
         wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
         unzip edgedriver_linux64.zip
         sudo mv msedgedriver /usr/local/bin/
