@@ -49,10 +49,10 @@ jobs:
 
         sleep 2
 
-        if unzip -o -q chromedriver-linux64.zip -d chromedriver-linux64-temp; then
-          sudo mv chromedriver-linux64-temp/chromedriver /usr/local/bin/
+        if unzip -o -q chromedriver-linux64.zip; then
+          sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
-          rm -rf chromedriver-linux64-temp chromedriver-linux64.zip
+          rm chromedriver-linux64.zip
         else
           echo "Unzip failed for chromedriver-linux64.zip"
           exit 1
