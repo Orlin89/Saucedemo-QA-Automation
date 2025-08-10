@@ -22,14 +22,14 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Setup Chrome browser
+    - name: Setup Chrome browser and ChromeDriver
       uses: browser-actions/setup-chromium@v1
 
-    - name: Setup GeckoDriver (Firefox)
-      uses: firefox/setup-geckodriver@v1
+    - name: Setup GeckoDriver
+      uses: webfactory/setup-geckodriver@v2
 
     - name: Setup EdgeDriver
-      uses: peter-evans/msedge-driver@v1.1.0
+      uses: msedge/setup-msedge@v1
 
     - name: Build project
       run: dotnet build --no-restore
