@@ -39,25 +39,40 @@ jobs:
         CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
         DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}")
         wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
-        unzip chromedriver-linux64.zip
-        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/chromedriver
-        rm -rf chromedriver-linux64 chromedriver-linux64.zip
+
+        if unzip -o chromedriver-linux64.zip; then
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          rm -rf chromedriver-linux64 chromedriver-linux64.zip
+        else
+          echo "Unzip failed for chromedriver-linux64.zip"
+          exit 1
+        fi
 
         GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
         wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
-        tar -xzf geckodriver-*.tar.gz
-        sudo mv geckodriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/geckodriver
-        rm geckodriver-*.tar.gz
+
+        if tar -xzf geckodriver-*.tar.gz; then
+          sudo mv geckodriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/geckodriver
+          rm geckodriver-*.tar.gz
+        else
+          echo "Tar extraction failed for geckodriver"
+          exit 1
+        fi
 
         EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
         EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
         wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
-        unzip edgedriver_linux64.zip
-        sudo mv msedgedriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/msedgedriver
-        rm edgedriver_linux64.zip
+
+        if unzip -o edgedriver_linux64.zip; then
+          sudo mv msedgedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/msedgedriver
+          rm edgedriver_linux64.zip
+        else
+          echo "Unzip failed for edgedriver_linux64.zip"
+          exit 1
+        fi
 
         chromedriver --version
         geckodriver --version
