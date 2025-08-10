@@ -24,36 +24,51 @@ jobs:
 
     - name: Install browsers and drivers
       run: |
-        sudo apt-get update
-
-        # Chrome + ChromeDriver
+        echo "Installing latest Chrome..."
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
         sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable chromium-chromedriver
 
-        # Firefox + GeckoDriver
-        sudo apt-get install -y firefox-geckodriver
-
-        # Edge + EdgeDriver
+        echo "Installing latest Edge..."
         curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
+
+        echo "Updating package lists..."
         sudo apt-get update
-        sudo apt-get install -y microsoft-edge-stable unzip
 
+        echo "Installing browsers..."
+        sudo apt-get install -y google-chrome-stable firefox microsoft-edge-stable unzip wget
+
+        echo "Installing ChromeDriver..."
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}")
+        wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+        rm -rf chromedriver-linux64*
+
+        echo "Installing GeckoDriver..."
+        GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
+        wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
+        tar -xzf geckodriver-*.tar.gz
+        sudo mv geckodriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/geckodriver
+        rm geckodriver-*.tar.gz
+
+        echo "Installing EdgeDriver..."
         EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-        DRIVER_URL="https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
-        wget -q $DRIVER_URL -O msedgedriver.zip
-        unzip msedgedriver.zip
+        wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
+        unzip edgedriver_linux64.zip
         sudo mv msedgedriver /usr/local/bin/
-        rm msedgedriver.zip
+        sudo chmod +x /usr/local/bin/msedgedriver
+        rm edgedriver_linux64.zip
 
-        echo "=== Installed versions ==="
+        echo "Installed versions:"
         google-chrome --version || google-chrome-stable --version
-        chromedriver --version
         firefox --version
-        geckodriver --version
         microsoft-edge --version || microsoft-edge-stable --version
+        chromedriver --version
+        geckodriver --version
         msedgedriver --version
 
     - name: Build project
@@ -106,4 +121,3 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./AllureReport
         destination_dir: allure
-
