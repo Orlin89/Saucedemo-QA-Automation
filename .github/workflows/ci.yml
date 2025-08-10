@@ -48,11 +48,8 @@ jobs:
           exit 1
         fi
 
-        unzip -l chromedriver-linux64.zip
-
         unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
-
-        CHROMEDRIVER_PATH=$(find temp_chromedriver -name chromedriver | head -1)
+        CHROMEDRIVER_PATH=$(find temp_chromedriver -type f -name chromedriver | head -1)
 
         if [ -z "$CHROMEDRIVER_PATH" ]; then
           echo "chromedriver executable not found in archive"
@@ -68,32 +65,20 @@ jobs:
         GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
         wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
 
-        tar -tzf geckodriver-*.tar.gz
-
-        if tar -xzf geckodriver-*.tar.gz; then
-          sudo mv geckodriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/geckodriver
-          rm geckodriver-*.tar.gz
-        else
-          echo "Tar extraction failed for geckodriver"
-          exit 1
-        fi
+        tar -xzf geckodriver-*.tar.gz
+        sudo mv geckodriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/geckodriver
+        rm geckodriver-*.tar.gz
 
         # EdgeDriver
         EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
         EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
         wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
 
-        unzip -l edgedriver_linux64.zip
-
-        if unzip -o -q edgedriver_linux64.zip; then
-          sudo mv msedgedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/msedgedriver
-          rm edgedriver_linux64.zip
-        else
-          echo "Unzip failed for edgedriver_linux64.zip"
-          exit 1
-        fi
+        unzip -o -q edgedriver_linux64.zip
+        sudo mv msedgedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/msedgedriver
+        rm edgedriver_linux64.zip
 
         # Verify drivers versions
         chromedriver --version
