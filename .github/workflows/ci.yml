@@ -32,7 +32,7 @@ jobs:
         # Install Microsoft Edge
         curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
         sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
-        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list'
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
         sudo apt-get update && sudo apt-get install -y microsoft-edge-stable
 
         # Install Firefox
@@ -42,43 +42,53 @@ jobs:
         firefox --version
         microsoft-edge --version
 
-    - name: Install browser drivers
+    - name: Install browser drivers (with fallbacks)
       run: |
         set -e
         sudo apt-get install -y wget unzip curl
-
-        # Clean old files
         rm -rf chromedriver* geckodriver* edgedriver* temp_chromedriver msedgedriver
 
-        #### Install ChromeDriver (matching Chrome version)
+        #### ChromeDriver
         CHROME_MAJOR=$(google-chrome --version | grep -oP '\d+' | head -1)
         DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")
-        wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
-        unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
-        sudo mv temp_chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-        sudo chmod +x /usr/local/bin/chromedriver
-        rm -rf temp_chromedriver chromedriver-linux64.zip
+        if [ -z "$DRIVER_VERSION" ]; then
+          echo "⚠ No exact ChromeDriver match, using latest."
+          DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE)
+        fi
+        wget -q --show-progress "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" || echo "❌ Failed to download ChromeDriver"
+        if [ -f chromedriver-linux64.zip ]; then
+          unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
+          sudo mv temp_chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
+          rm -rf temp_chromedriver chromedriver-linux64.zip
+          chromedriver --version
+        fi
 
-        #### Install GeckoDriver (latest release)
+        #### GeckoDriver
         GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
-        wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
-        tar -xzf geckodriver-*.tar.gz
-        sudo mv geckodriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/geckodriver
-        rm geckodriver-*.tar.gz
+        wget -q --show-progress "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz" || echo "❌ Failed to download GeckoDriver"
+        if ls geckodriver-*.tar.gz 1> /dev/null 2>&1; then
+          tar -xzf geckodriver-*.tar.gz
+          sudo mv geckodriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/geckodriver
+          rm geckodriver-*.tar.gz
+          geckodriver --version
+        fi
 
-        #### Install EdgeDriver (matching Edge version)
+        #### EdgeDriver
         EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+' | head -1)
-        wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
-        unzip -o -q edgedriver_linux64.zip
-        sudo mv msedgedriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/msedgedriver
-        rm edgedriver_linux64.zip
-
-        #### Verify
-        chromedriver --version
-        geckodriver --version
-        msedgedriver --version
+        if [ -z "$EDGE_VERSION" ]; then
+          echo "⚠ No Edge version detected, using stable fallback."
+          EDGE_VERSION="128.0.2739.67"
+        fi
+        wget -q --show-progress "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" || echo "❌ Failed to download EdgeDriver"
+        if [ -f edgedriver_linux64.zip ]; then
+          unzip -o -q edgedriver_linux64.zip
+          sudo mv msedgedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/msedgedriver
+          rm edgedriver_linux64.zip
+          msedgedriver --version
+        fi
 
     - name: Build project
       run: dotnet build --no-restore
