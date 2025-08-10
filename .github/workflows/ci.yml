@@ -22,7 +22,7 @@ jobs:
     - name: Install browsers
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget curl gnupg unzip
+        sudo apt-get install -y wget curl gnupg unzip jq
 
         # Install Google Chrome
         curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux.gpg
@@ -43,18 +43,17 @@ jobs:
 
     - name: Install browser drivers to /usr/local/bin
       run: |
-        sudo apt-get install -y wget unzip curl
+        sudo apt-get install -y wget unzip curl jq
 
         # Clean old files
         rm -rf chromedriver-linux64 chromedriver-linux64.zip temp_chromedriver
         rm -f geckodriver-*.tar.gz geckodriver
         rm -f edgedriver_linux64.zip msedgedriver
 
-        # ChromeDriver
-        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
-        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")
-        wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+        # ChromeDriver (from Chrome for Testing JSON API)
+        DRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json \
+          | jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
+        wget -q "$DRIVER_URL" -O chromedriver-linux64.zip
 
         FILESIZE=$(stat -c%s chromedriver-linux64.zip)
         if [ "$FILESIZE" -lt 1000000 ]; then
