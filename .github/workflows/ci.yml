@@ -22,7 +22,7 @@ jobs:
     - name: Install browsers
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget curl gnupg unzip jq
+        sudo apt-get install -y wget curl gnupg unzip
 
         # Install Google Chrome
         curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux.gpg
@@ -35,65 +35,47 @@ jobs:
         sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list'
         sudo apt-get update && sudo apt-get install -y microsoft-edge-stable
 
+        # Install Firefox
         sudo apt-get install -y firefox
 
         google-chrome --version
         firefox --version
         microsoft-edge --version
 
-    - name: Install browser drivers to /usr/local/bin
+    - name: Install browser drivers
       run: |
-        sudo apt-get install -y wget unzip curl jq
+        set -e
+        sudo apt-get install -y wget unzip curl
 
         # Clean old files
-        rm -rf chromedriver-linux64 chromedriver-linux64.zip temp_chromedriver
-        rm -f geckodriver-*.tar.gz geckodriver
-        rm -f edgedriver_linux64.zip msedgedriver
+        rm -rf chromedriver* geckodriver* edgedriver* temp_chromedriver msedgedriver
 
-        # ChromeDriver (from Chrome for Testing JSON API)
-        DRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json \
-          | jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
-        wget -q "$DRIVER_URL" -O chromedriver-linux64.zip
-
-        FILESIZE=$(stat -c%s chromedriver-linux64.zip)
-        if [ "$FILESIZE" -lt 1000000 ]; then
-          echo "Downloaded chromedriver-linux64.zip is too small, exiting."
-          exit 1
-        fi
-
+        #### Install ChromeDriver (matching Chrome version)
+        CHROME_MAJOR=$(google-chrome --version | grep -oP '\d+' | head -1)
+        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")
+        wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
         unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
-        CHROMEDRIVER_PATH=$(find temp_chromedriver -type f -name chromedriver | head -1)
-
-        if [ -z "$CHROMEDRIVER_PATH" ]; then
-          echo "chromedriver executable not found in archive"
-          exit 1
-        else
-          sudo mv "$CHROMEDRIVER_PATH" /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
-        fi
-
+        sudo mv temp_chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        sudo chmod +x /usr/local/bin/chromedriver
         rm -rf temp_chromedriver chromedriver-linux64.zip
 
-        # GeckoDriver
+        #### Install GeckoDriver (latest release)
         GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
         wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
-
         tar -xzf geckodriver-*.tar.gz
         sudo mv geckodriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/geckodriver
         rm geckodriver-*.tar.gz
 
-        # EdgeDriver
-        EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-        EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
+        #### Install EdgeDriver (matching Edge version)
+        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+' | head -1)
         wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
-
         unzip -o -q edgedriver_linux64.zip
         sudo mv msedgedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/msedgedriver
         rm edgedriver_linux64.zip
 
-        # Verify drivers versions
+        #### Verify
         chromedriver --version
         geckodriver --version
         msedgedriver --version
