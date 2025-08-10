@@ -22,30 +22,39 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Install latest Chrome, Firefox, and Edge
+    - name: Install browsers and drivers
       run: |
-        echo "Installing latest Chrome..."
-        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
-
-        echo "Installing latest Edge..."
-        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-
-        echo "Updating package lists..."
         sudo apt-get update
 
-        echo "Installing browsers..."
-        sudo apt-get install -y google-chrome-stable firefox microsoft-edge-stable
+        # Chrome + ChromeDriver
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable chromium-chromedriver
 
-        echo "Chrome version:"
+        # Firefox + GeckoDriver
+        sudo apt-get install -y firefox-geckodriver
+
+        # Edge + EdgeDriver
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
+        sudo apt-get update
+        sudo apt-get install -y microsoft-edge-stable unzip
+
+        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        DRIVER_URL="https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
+        wget -q $DRIVER_URL -O msedgedriver.zip
+        unzip msedgedriver.zip
+        sudo mv msedgedriver /usr/local/bin/
+        rm msedgedriver.zip
+
+        echo "=== Installed versions ==="
         google-chrome --version || google-chrome-stable --version
-
-        echo "Firefox version:"
+        chromedriver --version
         firefox --version
-
-        echo "Edge version:"
+        geckodriver --version
         microsoft-edge --version || microsoft-edge-stable --version
+        msedgedriver --version
 
     - name: Build project
       run: dotnet build --no-restore
@@ -97,3 +106,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./AllureReport
         destination_dir: allure
+

@@ -69,6 +69,9 @@ namespace SauceDemoAutomationUI.Tests
         }
 
         [Test]
+        [AllureTag("UI")]
+        [AllureSeverity(SeverityLevel.normal)]
+        [AllureOwner("Automation")]
         public void TestPageTitle()
         {           
             var inventoryPage = new InventoryPage(driver);
