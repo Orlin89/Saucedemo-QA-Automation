@@ -2,7 +2,6 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Edge;
-using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using System;
 
@@ -14,11 +13,15 @@ namespace SauceDemoAutomationUI.Drivers
         {
             IWebDriver driver;
             bool isCi = Environment.GetEnvironmentVariable("CI") == "true";
+            string driverPath = "/usr/local/bin";
 
             switch (browser.ToLower())
             {
                 case "chrome":
-                    new DriverManager().SetUpDriver(new ChromeConfig());
+                    if (!isCi)
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
+                    }
                     var chromeOptions = new ChromeOptions();
 
                     if (isCi)
@@ -27,47 +30,58 @@ namespace SauceDemoAutomationUI.Drivers
                         chromeOptions.AddArgument("--no-sandbox");
                         chromeOptions.AddArgument("--disable-dev-shm-usage");
                         chromeOptions.AddArgument("--disable-gpu");
+                        driver = new ChromeDriver(driverPath, chromeOptions);
                     }
                     else
                     {
                         chromeOptions.AddArgument("--incognito");
                         chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
                         chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
+                        driver = new ChromeDriver(chromeOptions);
                     }
-
-                    driver = new ChromeDriver(chromeOptions);
                     break;
 
                 case "firefox":
-                    new DriverManager().SetUpDriver(new FirefoxConfig());
+                    if (!isCi)
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
+                    }
                     var firefoxOptions = new FirefoxOptions();
 
                     if (isCi)
                     {
                         firefoxOptions.AddArgument("--headless");
+                        driver = new FirefoxDriver(driverPath, firefoxOptions);
                     }
-
-                    driver = new FirefoxDriver(firefoxOptions);
+                    else
+                    {
+                        driver = new FirefoxDriver(firefoxOptions);
+                    }
                     break;
 
                 case "edge":
-                    new DriverManager().SetUpDriver(new EdgeConfig());
+                    if (!isCi)
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
+                    }
                     var edgeOptions = new EdgeOptions();
 
                     if (isCi)
                     {
                         edgeOptions.AddArgument("headless");
                         edgeOptions.AddArgument("disable-gpu");
+                        driver = new EdgeDriver(driverPath, edgeOptions);
                     }
-
-                    driver = new EdgeDriver(edgeOptions);
+                    else
+                    {
+                        driver = new EdgeDriver(edgeOptions);
+                    }
                     break;
 
                 default:
                     throw new ArgumentException($"Browser not supported: {browser}");
             }
 
-            // Apply common driver settings
             driver.Manage().Window.Maximize();
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
