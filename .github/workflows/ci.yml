@@ -23,6 +23,8 @@ jobs:
       run: dotnet restore
 
     - name: Install browsers and drivers
+      env:
+        PATH: /usr/local/bin:$PATH
       run: |
         echo "Installing latest Chrome..."
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
@@ -56,10 +58,31 @@ jobs:
         rm geckodriver-*.tar.gz
 
         echo "Installing EdgeDriver..."
-        EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        if command -v microsoft-edge-stable &> /dev/null; then
+          EDGE_VERSION_FULL=$(microsoft-edge-stable --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        else
+          EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        fi
+
+        echo "Edge full version: $EDGE_VERSION_FULL"
+
         EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
-        wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
-        unzip edgedriver_linux64.zip
+
+        echo "Edge version for driver: $EDGE_VERSION"
+
+        URL="https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
+        echo "Downloading EdgeDriver from $URL"
+
+        wget -q --show-progress $URL -O edgedriver_linux64.zip || {
+          echo "Failed to download EdgeDriver for version $EDGE_VERSION"
+          exit 1
+        }
+
+        unzip edgedriver_linux64.zip || {
+          echo "Unzip failed - file may be corrupted"
+          exit 1
+        }
+
         sudo mv msedgedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/msedgedriver
         rm edgedriver_linux64.zip
