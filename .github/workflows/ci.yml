@@ -32,7 +32,8 @@ jobs:
       run: |
         sudo apt-get install -y wget unzip curl
 
-        rm -rf chromedriver-linux64 chromedriver-linux64.zip
+        # Clean old files
+        rm -rf chromedriver-linux64 chromedriver-linux64.zip temp_chromedriver
         rm -f geckodriver-*.tar.gz geckodriver
         rm -f edgedriver_linux64.zip msedgedriver
 
@@ -49,10 +50,20 @@ jobs:
 
         sleep 2
 
-        if unzip -o -q chromedriver-linux64.zip; then
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-          rm -rf chromedriver-linux64 chromedriver-linux64.zip
+        mkdir -p temp_chromedriver
+        if unzip -o -q chromedriver-linux64.zip -d temp_chromedriver; then
+          echo "Unzip successful, files:"
+          ls -l temp_chromedriver
+
+          if [ -f temp_chromedriver/chromedriver ]; then
+            sudo mv temp_chromedriver/chromedriver /usr/local/bin/
+            sudo chmod +x /usr/local/bin/chromedriver
+          else
+            echo "chromedriver executable not found after unzip"
+            exit 1
+          fi
+
+          rm -rf temp_chromedriver chromedriver-linux64.zip
         else
           echo "Unzip failed for chromedriver-linux64.zip"
           exit 1
