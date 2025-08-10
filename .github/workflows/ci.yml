@@ -22,7 +22,20 @@ jobs:
     - name: Install browsers
       run: |
         sudo apt-get update
-        sudo apt-get install -y google-chrome-stable firefox microsoft-edge-stable
+        sudo apt-get install -y wget curl gnupg unzip
+
+        # Install Google Chrome
+        curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux.gpg
+        echo "deb [signed-by=/usr/share/keyrings/google-linux.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update && sudo apt-get install -y google-chrome-stable
+
+        # Install Microsoft Edge
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
+        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list'
+        sudo apt-get update && sudo apt-get install -y microsoft-edge-stable
+
+        sudo apt-get install -y firefox
 
         google-chrome --version
         firefox --version
@@ -38,9 +51,10 @@ jobs:
         rm -f edgedriver_linux64.zip msedgedriver
 
         # ChromeDriver
-        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
-        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}")
-        wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")
+        wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
 
         FILESIZE=$(stat -c%s chromedriver-linux64.zip)
         if [ "$FILESIZE" -lt 1000000 ]; then
