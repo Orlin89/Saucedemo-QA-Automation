@@ -22,14 +22,56 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Setup Chrome browser and ChromeDriver
-      uses: browser-actions/setup-chromium@v1
+    - name: Install browsers and drivers
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget curl unzip
 
-    - name: Setup GeckoDriver
-      uses: webfactory/setup-geckodriver@v2
+        # Add Google Chrome repo and key
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
 
-    - name: Setup EdgeDriver
-      uses: msedge/setup-msedge@v1
+        # Add Microsoft Edge repo and key
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-edge.gpg
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
+
+        sudo apt-get update
+
+        sudo apt-get install -y google-chrome-stable firefox microsoft-edge-stable
+
+        # Install ChromeDriver
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}")
+        wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+        rm -rf chromedriver-linux64*
+
+        # Install GeckoDriver
+        GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
+        wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
+        tar -xzf geckodriver-*.tar.gz
+        sudo mv geckodriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/geckodriver
+        rm geckodriver-*.tar.gz
+
+        # Install EdgeDriver
+        EDGE_VERSION_FULL=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+        EDGE_VERSION=$(echo $EDGE_VERSION_FULL | grep -oP '^\d+\.\d+\.\d+')
+        wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"
+        unzip edgedriver_linux64.zip
+        sudo mv msedgedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/msedgedriver
+        rm edgedriver_linux64.zip
+
+        # Check installed versions
+        google-chrome --version
+        firefox --version
+        microsoft-edge --version
+        chromedriver --version
+        geckodriver --version
+        msedgedriver --version
 
     - name: Build project
       run: dotnet build --no-restore
