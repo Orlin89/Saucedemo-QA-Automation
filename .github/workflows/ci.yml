@@ -42,53 +42,46 @@ jobs:
         firefox --version
         microsoft-edge --version
 
-    - name: Install browser drivers (with fallbacks)
+    - name: Install browser drivers
       run: |
         set -e
-        sudo apt-get install -y wget unzip curl
+
+        # Clean old files
         rm -rf chromedriver* geckodriver* edgedriver* temp_chromedriver msedgedriver
 
-        #### ChromeDriver
+        #### Install ChromeDriver (matching Chrome version)
         CHROME_MAJOR=$(google-chrome --version | grep -oP '\d+' | head -1)
         DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")
-        if [ -z "$DRIVER_VERSION" ]; then
-          echo "⚠ No exact ChromeDriver match, using latest."
-          DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE)
-        fi
-        wget -q --show-progress "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" || echo "❌ Failed to download ChromeDriver"
-        if [ -f chromedriver-linux64.zip ]; then
-          unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
-          sudo mv temp_chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
-          rm -rf temp_chromedriver chromedriver-linux64.zip
-          chromedriver --version
-        fi
+        wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+        unzip -o -q chromedriver-linux64.zip -d temp_chromedriver
+        sudo mv temp_chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        sudo chmod +x /usr/local/bin/chromedriver
+        rm -rf temp_chromedriver chromedriver-linux64.zip
 
-        #### GeckoDriver
+        #### Install GeckoDriver (latest release)
         GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
-        wget -q --show-progress "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz" || echo "❌ Failed to download GeckoDriver"
-        if ls geckodriver-*.tar.gz 1> /dev/null 2>&1; then
-          tar -xzf geckodriver-*.tar.gz
-          sudo mv geckodriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/geckodriver
-          rm geckodriver-*.tar.gz
-          geckodriver --version
+        wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
+        tar -xzf geckodriver-*.tar.gz
+        sudo mv geckodriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/geckodriver
+        rm geckodriver-*.tar.gz
+
+        #### Install EdgeDriver (matching Edge version)
+        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+        if [ -n "$EDGE_VERSION" ]; then
+          wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" || exit 0
+          unzip -o -q edgedriver_linux64.zip || true
+          sudo mv msedgedriver /usr/local/bin/ || true
+          sudo chmod +x /usr/local/bin/msedgedriver || true
+          rm -f edgedriver_linux64.zip
+        else
+          echo "Edge version not found, skipping EdgeDriver."
         fi
 
-        #### EdgeDriver
-        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+' | head -1)
-        if [ -z "$EDGE_VERSION" ]; then
-          echo "⚠ No Edge version detected, using stable fallback."
-          EDGE_VERSION="128.0.2739.67"
-        fi
-        wget -q --show-progress "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" || echo "❌ Failed to download EdgeDriver"
-        if [ -f edgedriver_linux64.zip ]; then
-          unzip -o -q edgedriver_linux64.zip
-          sudo mv msedgedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/msedgedriver
-          rm edgedriver_linux64.zip
-          msedgedriver --version
-        fi
+        #### Verify
+        chromedriver --version
+        geckodriver --version
+        msedgedriver --version || echo "EdgeDriver not installed"
 
     - name: Build project
       run: dotnet build --no-restore
