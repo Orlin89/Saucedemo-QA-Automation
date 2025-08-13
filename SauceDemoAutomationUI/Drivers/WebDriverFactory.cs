@@ -44,9 +44,7 @@ namespace SauceDemoAutomationUI.Drivers
                         chromeOptions.AddArgument("--disable-background-timer-throttling");
                         chromeOptions.AddArgument("--disable-backgrounding-occluded-windows");
                         chromeOptions.AddArgument("--disable-renderer-backgrounding");
-
-                        // Remove --disable-javascript as it breaks functionality
-                        chromeOptions.RemoveArgumentPattern("--disable-javascript");
+                                          
 
                         driver = new ChromeDriver(driverPath, chromeOptions);
                     }
