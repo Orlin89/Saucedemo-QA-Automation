@@ -35,10 +35,18 @@ jobs:
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
         sudo apt-get update && sudo apt-get install -y microsoft-edge-stable
 
-        # Install Firefox (remove snap, use apt version for better compatibility)
-        sudo apt-get remove -y firefox
+        # Install Firefox (remove snap, use standard package)
         sudo snap remove firefox || true
+        sudo apt-get remove -y firefox
+        
+        # Add Mozilla PPA for latest Firefox
         sudo add-apt-repository -y ppa:mozillateam/ppa
+        echo '
+        Package: *
+        Pin: release o=LP-PPA-mozillateam
+        Pin-Priority: 1001
+        ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+        
         sudo apt-get update && sudo apt-get install -y firefox
 
         google-chrome --version
@@ -118,10 +126,12 @@ jobs:
 
     - name: Setup virtual display for headless testing
       run: |
-        sudo apt-get install -y xvfb
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
-        echo "DISPLAY=:99" >> $GITHUB_ENV
+        sudo apt-get install -y xvfb x11-utils
+        export DISPLAY=:99.0
+        Xvfb :99 -screen 0 1920x1080x24 -ac -noreset > /dev/null 2>&1 &
+        sleep 3
+        echo "DISPLAY=:99.0" >> $GITHUB_ENV
+        echo "Virtual display started on :99.0"
 
     - name: Restore dependencies
       run: dotnet restore
@@ -132,8 +142,17 @@ jobs:
     - name: Run UI Tests
       continue-on-error: true
       env:
-        DISPLAY: :99
-      run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed" --filter="TestCategory!=Edge" # Temporarily skip Edge tests
+        DISPLAY: :99.0
+        FIREFOX_X11_FORCE_ENABLED: 1
+      run: |
+        echo "Starting UI tests..."
+        # First run without Edge to test Chrome and Firefox
+        dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj \
+          --logger:"console;verbosity=detailed" \
+          --filter="TestCategory!=Edge" \
+          --settings:./test.runsettings || true
+        
+        echo "UI tests completed."
 
     - name: Run API Tests
       continue-on-error: true

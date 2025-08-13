@@ -27,26 +27,27 @@ namespace SauceDemoAutomationUI.Drivers
 
                     if (isCi)
                     {
-                        // Enhanced Chrome options for CI
+                        // Optimized Chrome options for CI
                         chromeOptions.AddArgument("--headless=new");
                         chromeOptions.AddArgument("--no-sandbox");
                         chromeOptions.AddArgument("--disable-dev-shm-usage");
                         chromeOptions.AddArgument("--disable-gpu");
-                        chromeOptions.AddArgument("--disable-web-security");
-                        chromeOptions.AddArgument("--disable-features=VizDisplayCompositor");
-                        chromeOptions.AddArgument("--remote-debugging-port=9222");
                         chromeOptions.AddArgument("--window-size=1920,1080");
-                        chromeOptions.AddArgument("--start-maximized");
                         chromeOptions.AddArgument("--disable-extensions");
-                        chromeOptions.AddArgument("--disable-plugins");
-                        chromeOptions.AddArgument("--disable-images");
-                        chromeOptions.AddArgument("--disable-javascript");
                         chromeOptions.AddArgument("--disable-background-timer-throttling");
                         chromeOptions.AddArgument("--disable-backgrounding-occluded-windows");
                         chromeOptions.AddArgument("--disable-renderer-backgrounding");
-                                          
+                        chromeOptions.AddArgument("--disable-ipc-flooding-protection");
+                        chromeOptions.AddArgument("--enable-automation");
+                        chromeOptions.AddArgument("--disable-blink-features=AutomationControlled");
+                        chromeOptions.AddExcludedArgument("enable-automation");
+                        chromeOptions.AddUserProfilePreference("useAutomationExtension", false);
 
-                        driver = new ChromeDriver(driverPath, chromeOptions);
+                        var service = ChromeDriverService.CreateDefaultService(driverPath);
+                        service.SuppressInitialDiagnosticInformation = true;
+                        service.EnableVerboseLogging = false;
+
+                        driver = new ChromeDriver(service, chromeOptions, TimeSpan.FromMinutes(3));
                     }
                     else
                     {
@@ -73,8 +74,15 @@ namespace SauceDemoAutomationUI.Drivers
                         firefoxOptions.SetPreference("useAutomationExtension", false);
                         firefoxOptions.SetPreference("dom.webnotifications.enabled", false);
                         firefoxOptions.SetPreference("media.volume_scale", "0.0");
+                        firefoxOptions.SetPreference("browser.startup.homepage", "about:blank");
+                        firefoxOptions.SetPreference("startup.homepage_welcome_url", "about:blank");
+                        firefoxOptions.SetPreference("startup.homepage_welcome_url.additional", "about:blank");
 
-                        driver = new FirefoxDriver(driverPath, firefoxOptions);
+                        var service = FirefoxDriverService.CreateDefaultService(driverPath);
+                        service.SuppressInitialDiagnosticInformation = true;
+                      
+
+                        driver = new FirefoxDriver(service, firefoxOptions, TimeSpan.FromMinutes(5));
                     }
                     else
                     {
@@ -87,7 +95,7 @@ namespace SauceDemoAutomationUI.Drivers
                     string edgeDriverPath = Path.Combine(driverPath, "msedgedriver");
                     if (isCi && !File.Exists(edgeDriverPath))
                     {
-                        throw new NotSupportedException($"EdgeDriver not found at {edgeDriverPath}. Edge tests are currently not supported in CI environment.");
+                        throw new NotSupportedException($"EdgeDriver not found at {edgeDriverPath}. Edge tests are currently not supported in CI environment due to driver installation issues.");
                     }
 
                     if (!isCi)
@@ -98,17 +106,19 @@ namespace SauceDemoAutomationUI.Drivers
 
                     if (isCi)
                     {
-                        // Fixed Edge headless argument
-                        edgeOptions.AddArgument("--headless=new");  // Fixed from "headless" to "--headless=new"
+                        // Fixed Edge options for CI
+                        edgeOptions.AddArgument("--headless=new");
                         edgeOptions.AddArgument("--no-sandbox");
                         edgeOptions.AddArgument("--disable-dev-shm-usage");
                         edgeOptions.AddArgument("--disable-gpu");
                         edgeOptions.AddArgument("--window-size=1920,1080");
-                        edgeOptions.AddArgument("--start-maximized");
                         edgeOptions.AddArgument("--disable-extensions");
                         edgeOptions.AddArgument("--disable-web-security");
 
-                        driver = new EdgeDriver(driverPath, edgeOptions);
+                        var service = EdgeDriverService.CreateDefaultService(driverPath);
+                        service.SuppressInitialDiagnosticInformation = true;
+
+                        driver = new EdgeDriver(service, edgeOptions, TimeSpan.FromMinutes(3));
                     }
                     else
                     {
