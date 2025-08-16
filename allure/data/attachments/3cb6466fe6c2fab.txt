@@ -1,0 +1,13 @@
+Setting up test with browser: firefox
+Setup failed for browser firefox: Cannot start the driver service on http://localhost:43829/
+Stack trace:    at OpenQA.Selenium.DriverService.Start()
+   at OpenQA.Selenium.Remote.DriverServiceCommandExecutor.ExecuteAsync(Command commandToExecute)
+   at OpenQA.Selenium.WebDriver.ExecuteAsync(String driverCommandToExecute, Dictionary`2 parameters)
+   at OpenQA.Selenium.WebDriver.Execute(String driverCommandToExecute, Dictionary`2 parameters)
+   at OpenQA.Selenium.WebDriver.StartSession(ICapabilities capabilities)
+   at OpenQA.Selenium.WebDriver..ctor(ICommandExecutor executor, ICapabilities capabilities)
+   at OpenQA.Selenium.Firefox.FirefoxDriver..ctor(FirefoxDriverService service, FirefoxOptions options, TimeSpan commandTimeout)
+   at OpenQA.Selenium.Firefox.FirefoxDriver..ctor(String geckoDriverDirectory, FirefoxOptions options, TimeSpan commandTimeout)
+   at OpenQA.Selenium.Firefox.FirefoxDriver..ctor(String geckoDriverDirectory, FirefoxOptions options)
+   at SauceDemoAutomationUI.Drivers.WebDriverFactory.CreateDriver(String browser) in /home/runner/work/Saucedemo-QA-Automation/Saucedemo-QA-Automation/SauceDemoAutomationUI/Drivers/WebDriverFactory.cs:line 85
+   at SauceDemoAutomationUI.Tests.BaseTests.SetUp() in /home/runner/work/Saucedemo-QA-Automation/Saucedemo-QA-Automation/SauceDemoAutomationUI/Tests/BaseTests.cs:line 26
