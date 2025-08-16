@@ -65,13 +65,34 @@ jobs:
         rm -rf temp_chromedriver chromedriver-linux64.zip
 
         # Install GeckoDriver (Firefox)
-        GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
+        GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d '"' -f 4)
         echo "Installing GeckoDriver version: $GECKO_VERSION"
-        wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
-        tar -xzf geckodriver-*.tar.gz
-        sudo mv geckodriver /usr/local/bin/
-        sudo chmod +x /usr/local/bin/geckodriver
-        rm geckodriver-*.tar.gz
+        
+        if [ -z "$GECKO_VERSION" ]; then
+          echo "Failed to get GeckoDriver version, using fallback"
+          GECKO_VERSION="v0.36.0"
+        fi
+        
+        echo "Downloading GeckoDriver from: https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
+        
+        if wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"; then
+          tar -xzf geckodriver-*.tar.gz
+          if [ -f "geckodriver" ]; then
+            sudo mv geckodriver /usr/local/bin/
+            sudo chmod +x /usr/local/bin/geckodriver
+            echo "GeckoDriver installed successfully"
+          else
+            echo "GeckoDriver binary not found after extraction"
+          fi
+          rm -f geckodriver-*.tar.gz
+        else
+          echo "Failed to download GeckoDriver"
+          # Create dummy geckodriver
+          echo '#!/bin/bash' | sudo tee /usr/local/bin/geckodriver > /dev/null
+          echo 'echo "GeckoDriver not available"' | sudo tee -a /usr/local/bin/geckodriver > /dev/null
+          echo 'exit 1' | sudo tee -a /usr/local/bin/geckodriver > /dev/null
+          sudo chmod +x /usr/local/bin/geckodriver
+        fi
 
         # Install EdgeDriver (improved and more reliable)
         if microsoft-edge --version > /dev/null 2>&1; then
