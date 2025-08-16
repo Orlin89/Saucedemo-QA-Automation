@@ -1,0 +1,3 @@
+Setting up test with browser: chrome
+Navigating to SauceDemo...
+Setup completed successfully
