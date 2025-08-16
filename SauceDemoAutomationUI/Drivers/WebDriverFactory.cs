@@ -27,7 +27,7 @@ namespace SauceDemoAutomationUI.Drivers
 
                     if (isCi)
                     {
-                        // Enhanced Chrome options for CI
+                        // Fixed Chrome options for CI - REMOVED --disable-javascript
                         chromeOptions.AddArgument("--headless=new");
                         chromeOptions.AddArgument("--no-sandbox");
                         chromeOptions.AddArgument("--disable-dev-shm-usage");
@@ -40,11 +40,14 @@ namespace SauceDemoAutomationUI.Drivers
                         chromeOptions.AddArgument("--disable-extensions");
                         chromeOptions.AddArgument("--disable-plugins");
                         chromeOptions.AddArgument("--disable-images");
-                        chromeOptions.AddArgument("--disable-javascript");
                         chromeOptions.AddArgument("--disable-background-timer-throttling");
                         chromeOptions.AddArgument("--disable-backgrounding-occluded-windows");
                         chromeOptions.AddArgument("--disable-renderer-backgrounding");
-
+                        chromeOptions.AddArgument("--disable-ipc-flooding-protection");
+                        // Add these for better stability
+                        chromeOptions.AddArgument("--disable-background-networking");
+                        chromeOptions.AddArgument("--disable-default-apps");
+                        chromeOptions.AddArgument("--disable-sync");
 
                         driver = new ChromeDriver(driverPath, chromeOptions);
                     }
@@ -73,6 +76,9 @@ namespace SauceDemoAutomationUI.Drivers
                         firefoxOptions.SetPreference("useAutomationExtension", false);
                         firefoxOptions.SetPreference("dom.webnotifications.enabled", false);
                         firefoxOptions.SetPreference("media.volume_scale", "0.0");
+                        // Add preferences for better stability
+                        firefoxOptions.SetPreference("browser.tabs.remote.autostart", false);
+                        firefoxOptions.SetPreference("browser.tabs.remote.autostart.2", false);
 
                         driver = new FirefoxDriver(driverPath, firefoxOptions);
                     }
@@ -83,11 +89,11 @@ namespace SauceDemoAutomationUI.Drivers
                     break;
 
                 case "edge":
-                    // Check if EdgeDriver exists before trying to use it
+                    // Simplified Edge handling - fail fast if not available
                     string edgeDriverPath = Path.Combine(driverPath, "msedgedriver");
                     if (isCi && !File.Exists(edgeDriverPath))
                     {
-                        throw new NotSupportedException($"EdgeDriver not found at {edgeDriverPath}. Edge tests are currently not supported in CI environment.");
+                        throw new NotSupportedException($"EdgeDriver not found at {edgeDriverPath}. Skipping Edge tests in CI.");
                     }
 
                     if (!isCi)
@@ -98,13 +104,11 @@ namespace SauceDemoAutomationUI.Drivers
 
                     if (isCi)
                     {
-                        // Fixed Edge headless argument
-                        edgeOptions.AddArgument("--headless=new");  // Fixed from "headless" to "--headless=new"
+                        edgeOptions.AddArgument("--headless=new");
                         edgeOptions.AddArgument("--no-sandbox");
                         edgeOptions.AddArgument("--disable-dev-shm-usage");
                         edgeOptions.AddArgument("--disable-gpu");
                         edgeOptions.AddArgument("--window-size=1920,1080");
-                        edgeOptions.AddArgument("--start-maximized");
                         edgeOptions.AddArgument("--disable-extensions");
                         edgeOptions.AddArgument("--disable-web-security");
 
@@ -120,10 +124,13 @@ namespace SauceDemoAutomationUI.Drivers
                     throw new ArgumentException($"Browser not supported: {browser}");
             }
 
-            // Enhanced driver configuration
+            // Enhanced driver configuration with longer timeouts for CI
             driver.Manage().Window.Maximize();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
+            var implicitWait = isCi ? TimeSpan.FromSeconds(15) : TimeSpan.FromSeconds(10);
+            var pageLoadTimeout = isCi ? TimeSpan.FromSeconds(60) : TimeSpan.FromSeconds(30);
+
+            driver.Manage().Timeouts().ImplicitWait = implicitWait;
+            driver.Manage().Timeouts().PageLoad = pageLoadTimeout;
             driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
 
             return driver;

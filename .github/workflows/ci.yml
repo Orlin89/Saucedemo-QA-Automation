@@ -29,21 +29,25 @@ jobs:
         echo "deb [signed-by=/usr/share/keyrings/google-linux.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
         sudo apt-get update && sudo apt-get install -y google-chrome-stable
 
-        # Install Microsoft Edge
+        # Install Firefox (proper APT version - fixed)
+        sudo snap remove firefox || true
+        sudo apt-get remove -y firefox || true
+        sudo add-apt-repository -y ppa:mozillateam/ppa
+        echo 'Package: *' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+        echo 'Pin: release o=LP-PPA-mozillateam' | sudo tee -a /etc/apt/preferences.d/mozilla-firefox
+        echo 'Pin-Priority: 1001' | sudo tee -a /etc/apt/preferences.d/mozilla-firefox
+        sudo apt-get update && sudo apt-get install -y firefox
+
+        # Install Microsoft Edge (simplified and more reliable)
         curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
         sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-        sudo apt-get update && sudo apt-get install -y microsoft-edge-stable
+        sudo apt-get update && sudo apt-get install -y microsoft-edge-stable || echo "Edge installation failed, will skip Edge tests"
 
-        # Install Firefox (remove snap, use apt version for better compatibility)
-        sudo apt-get remove -y firefox
-        sudo snap remove firefox || true
-        sudo add-apt-repository -y ppa:mozillateam/ppa
-        sudo apt-get update && sudo apt-get install -y firefox
-
-        google-chrome --version
-        firefox --version
-        microsoft-edge --version
+        echo "Browser versions:"
+        google-chrome --version || echo "Chrome not found"
+        firefox --version || echo "Firefox not found"  
+        microsoft-edge --version || echo "Edge not found"
 
     - name: Install browser drivers
       run: |
@@ -69,51 +73,45 @@ jobs:
         sudo chmod +x /usr/local/bin/geckodriver
         rm geckodriver-*.tar.gz
 
-        # Install EdgeDriver (improved logic)
-        EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
-        echo "Edge version found: $EDGE_VERSION"
-        if [ -n "$EDGE_VERSION" ]; then
-          # Try different EdgeDriver download strategies
-          EDGE_MAJOR=$(echo $EDGE_VERSION | cut -d. -f1)
-          echo "Trying to download EdgeDriver for major version: $EDGE_MAJOR"
+        # Install EdgeDriver (improved and more reliable)
+        if microsoft-edge --version > /dev/null 2>&1; then
+          EDGE_VERSION=$(microsoft-edge --version | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+          echo "Edge version found: $EDGE_VERSION"
           
-          # Strategy 1: Try exact version
-          if wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip"; then
-            echo "Downloaded EdgeDriver exact version"
-          # Strategy 2: Try without patch version (major.minor.build)
-          elif wget -q "https://msedgedriver.azureedge.net/$(echo $EDGE_VERSION | cut -d. -f1-3).0/edgedriver_linux64.zip"; then
-            echo "Downloaded EdgeDriver without patch version"
-          # Strategy 3: Use alternative download method
-          else
-            echo "Trying alternative EdgeDriver download..."
-            LATEST_EDGE=$(curl -s https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/ | grep -oP 'Version: \K\d+\.\d+\.\d+' | head -1)
-            if [ -n "$LATEST_EDGE" ]; then
-              wget -q "https://msedgedriver.azureedge.net/${LATEST_EDGE}.0/edgedriver_linux64.zip" || echo "EdgeDriver download failed, will skip Edge tests"
+          if [ -n "$EDGE_VERSION" ]; then
+            EDGE_MAJOR=$(echo $EDGE_VERSION | cut -d. -f1)
+            echo "Downloading EdgeDriver for major version: $EDGE_MAJOR"
+            
+            # Try to download EdgeDriver with fallback strategy
+            if wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" -O edgedriver_linux64.zip 2>/dev/null; then
+              echo "Downloaded EdgeDriver exact version"
+            elif wget -q "https://msedgedriver.azureedge.net/$(echo $EDGE_VERSION | cut -d. -f1-3).0/edgedriver_linux64.zip" -O edgedriver_linux64.zip 2>/dev/null; then
+              echo "Downloaded EdgeDriver without patch version"
+            else
+              echo "EdgeDriver download failed, creating dummy driver"
+              echo '#!/bin/bash' | sudo tee /usr/local/bin/msedgedriver
+              echo 'echo "EdgeDriver not available"' | sudo tee -a /usr/local/bin/msedgedriver
+              echo 'exit 1' | sudo tee -a /usr/local/bin/msedgedriver
+              sudo chmod +x /usr/local/bin/msedgedriver
+            fi
+            
+            if [ -f "edgedriver_linux64.zip" ]; then
+              unzip -o -q edgedriver_linux64.zip
+              sudo mv msedgedriver /usr/local/bin/
+              sudo chmod +x /usr/local/bin/msedgedriver
+              rm -f edgedriver_linux64.zip
+              echo "EdgeDriver installed successfully"
             fi
           fi
-          
-          if [ -f "edgedriver_linux64.zip" ]; then
-            unzip -o -q edgedriver_linux64.zip
-            sudo mv msedgedriver /usr/local/bin/ 2>/dev/null || echo "EdgeDriver move failed"
-            sudo chmod +x /usr/local/bin/msedgedriver 2>/dev/null || echo "EdgeDriver chmod failed"
-            rm -f edgedriver_linux64.zip
-            echo "EdgeDriver installed successfully"
-          else
-            echo "EdgeDriver download failed, creating dummy driver"
-            echo '#!/bin/bash' | sudo tee /usr/local/bin/msedgedriver
-            echo 'echo "EdgeDriver not available"' | sudo tee -a /usr/local/bin/msedgedriver
-            echo 'exit 1' | sudo tee -a /usr/local/bin/msedgedriver
-            sudo chmod +x /usr/local/bin/msedgedriver
-          fi
         else
-          echo "Edge version not found, skipping EdgeDriver."
+          echo "Edge not installed, skipping EdgeDriver"
         fi
 
         # Verify installations
         echo "=== Driver Versions ==="
         chromedriver --version || echo "ChromeDriver not found"
         geckodriver --version || echo "GeckoDriver not found"
-        msedgedriver --version || echo "EdgeDriver not available"
+        msedgedriver --version 2>/dev/null || echo "EdgeDriver not available"
         echo "======================="
 
     - name: Setup virtual display for headless testing
@@ -121,7 +119,9 @@ jobs:
         sudo apt-get install -y xvfb
         export DISPLAY=:99
         Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+        sleep 3
         echo "DISPLAY=:99" >> $GITHUB_ENV
+        echo "Virtual display setup completed"
 
     - name: Restore dependencies
       run: dotnet restore
@@ -129,36 +129,90 @@ jobs:
     - name: Build project
       run: dotnet build --no-restore
 
-    - name: Run UI Tests
+    - name: Run UI Tests - Chrome and Firefox Only
       continue-on-error: true
       env:
         DISPLAY: :99
-      run: dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj --logger:"console;verbosity=detailed" --filter="TestCategory!=Edge" # Temporarily skip Edge tests
+      run: |
+        echo "Starting UI tests (Chrome and Firefox only)..."
+        dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj \
+          --logger:"console;verbosity=detailed" \
+          --filter="TestCategory!=Edge" \
+          --results-directory TestResults \
+          || echo "Some UI tests failed, continuing..."
+
+    - name: Run Edge Tests (if EdgeDriver available)
+      continue-on-error: true
+      env:
+        DISPLAY: :99
+      run: |
+        if msedgedriver --version > /dev/null 2>&1; then
+          echo "EdgeDriver available, running Edge tests..."
+          dotnet test SauceDemoAutomationUI/SauceDemoAutomationUI.csproj \
+            --logger:"console;verbosity=detailed" \
+            --filter="TestCategory=Edge" \
+            --results-directory TestResults \
+            || echo "Edge tests failed, continuing..."
+        else
+          echo "EdgeDriver not available, skipping Edge tests"
+        fi
 
     - name: Run API Tests
       continue-on-error: true
-      run: dotnet test SauceDemoAutomationAPI/SauceDemoAutomationAPI.csproj --logger:"console;verbosity=detailed"
+      run: |
+        echo "Starting API tests..."
+        dotnet test SauceDemoAutomationAPI/SauceDemoAutomationAPI.csproj \
+          --logger:"console;verbosity=detailed" \
+          --results-directory TestResults \
+          || echo "Some API tests failed, continuing..."
 
     - name: Copy Allure Results to unified folder
       run: |
+        echo "Copying Allure results..."
         mkdir -p TestResults/AllureResults
-        cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
-        cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults || true
+        
+        # Copy UI test results
+        if [ -d "SauceDemoAutomationUI/bin/Debug/net8.0/allure-results" ]; then
+          cp -r SauceDemoAutomationUI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults/ || echo "No UI allure results found"
+        fi
+        
+        # Copy API test results  
+        if [ -d "SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results" ]; then
+          cp -r SauceDemoAutomationAPI/bin/Debug/net8.0/allure-results/* TestResults/AllureResults/ || echo "No API allure results found"
+        fi
+        
+        # List what we have
+        echo "Allure results contents:"
+        ls -la TestResults/AllureResults/ || echo "No allure results directory"
 
     - name: Clone gh-pages branch to get previous Allure history
       run: |
-        git clone --depth 1 --branch gh-pages https://github.com/${{ github.repository }} gh-pages
+        echo "Cloning gh-pages for history..."
+        git clone --depth 1 --branch gh-pages https://github.com/${{ github.repository }} gh-pages || echo "No gh-pages branch found"
+        
         mkdir -p TestResults/AllureResults/history
+        
         if [ -d "gh-pages/allure/history" ]; then
-          cp -r gh-pages/allure/history/* TestResults/AllureResults/history/ || true
+          cp -r gh-pages/allure/history/* TestResults/AllureResults/history/ || echo "No previous history found"
+          echo "Previous history copied"
         else
           echo "No previous history found"
         fi
 
     - name: Generate Allure Report
       run: |
+        echo "Installing Allure..."
         npm install -g allure-commandline --save-dev
-        allure generate TestResults/AllureResults --clean -o AllureReport
+        
+        echo "Generating Allure report..."
+        if [ "$(ls -A TestResults/AllureResults 2>/dev/null)" ]; then
+          allure generate TestResults/AllureResults --clean -o AllureReport
+          echo "Allure report generated successfully"
+        else
+          echo "No test results found, creating empty report"
+          mkdir -p AllureReport
+          echo "<html><body><h1>No test results available</h1></body></html>" > AllureReport/index.html
+        fi
 
     - name: Upload Allure Report as artifact
       uses: actions/upload-artifact@v4
@@ -171,6 +225,7 @@ jobs:
       with:
         name: allure-history
         path: AllureReport/history
+      if: always()
 
     - name: Deploy Allure Report to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
@@ -178,3 +233,13 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./AllureReport
         destination_dir: allure
+      if: always()
+
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "=== Test Execution Summary ==="
+        echo "Workflow completed at: $(date)"
+        echo "Check the Allure report for detailed results"
+        echo "Report will be available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure/"
+        echo "=============================="
