@@ -82,29 +82,59 @@ jobs:
             EDGE_MAJOR=$(echo $EDGE_VERSION | cut -d. -f1)
             echo "Downloading EdgeDriver for major version: $EDGE_MAJOR"
             
-            # Try to download EdgeDriver with fallback strategy
-            if wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" -O edgedriver_linux64.zip 2>/dev/null; then
-              echo "Downloaded EdgeDriver exact version"
-            elif wget -q "https://msedgedriver.azureedge.net/$(echo $EDGE_VERSION | cut -d. -f1-3).0/edgedriver_linux64.zip" -O edgedriver_linux64.zip 2>/dev/null; then
-              echo "Downloaded EdgeDriver without patch version"
-            else
-              echo "EdgeDriver download failed, creating dummy driver"
-              echo '#!/bin/bash' | sudo tee /usr/local/bin/msedgedriver
-              echo 'echo "EdgeDriver not available"' | sudo tee -a /usr/local/bin/msedgedriver
-              echo 'exit 1' | sudo tee -a /usr/local/bin/msedgedriver
-              sudo chmod +x /usr/local/bin/msedgedriver
+            # Clean up any existing files first
+            rm -f edgedriver_linux64.zip
+            
+            # Try to download EdgeDriver with proper validation
+            EDGEDRIVER_DOWNLOADED=false
+            
+            if wget -q --spider "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" 2>/dev/null; then
+              if wget -q "https://msedgedriver.azureedge.net/${EDGE_VERSION}/edgedriver_linux64.zip" -O edgedriver_linux64.zip; then
+                echo "Downloaded EdgeDriver exact version"
+                EDGEDRIVER_DOWNLOADED=true
+              fi
+            elif wget -q --spider "https://msedgedriver.azureedge.net/$(echo $EDGE_VERSION | cut -d. -f1-3).0/edgedriver_linux64.zip" 2>/dev/null; then
+              if wget -q "https://msedgedriver.azureedge.net/$(echo $EDGE_VERSION | cut -d. -f1-3).0/edgedriver_linux64.zip" -O edgedriver_linux64.zip; then
+                echo "Downloaded EdgeDriver without patch version"
+                EDGEDRIVER_DOWNLOADED=true
+              fi
             fi
             
-            if [ -f "edgedriver_linux64.zip" ]; then
-              unzip -o -q edgedriver_linux64.zip
-              sudo mv msedgedriver /usr/local/bin/
-              sudo chmod +x /usr/local/bin/msedgedriver
+            # Only try to unzip if download was successful and file exists with content
+            if [ "$EDGEDRIVER_DOWNLOADED" = true ] && [ -s "edgedriver_linux64.zip" ]; then
+              if unzip -t edgedriver_linux64.zip > /dev/null 2>&1; then
+                unzip -o -q edgedriver_linux64.zip
+                if [ -f "msedgedriver" ]; then
+                  sudo mv msedgedriver /usr/local/bin/
+                  sudo chmod +x /usr/local/bin/msedgedriver
+                  echo "EdgeDriver installed successfully"
+                else
+                  echo "EdgeDriver binary not found after extraction"
+                  EDGEDRIVER_DOWNLOADED=false
+                fi
+              else
+                echo "Downloaded zip file is corrupted"
+                EDGEDRIVER_DOWNLOADED=false
+              fi
               rm -f edgedriver_linux64.zip
-              echo "EdgeDriver installed successfully"
+            fi
+            
+            # Create dummy driver if download/installation failed
+            if [ "$EDGEDRIVER_DOWNLOADED" != true ]; then
+              echo "EdgeDriver download/installation failed, creating dummy driver"
+              echo '#!/bin/bash' | sudo tee /usr/local/bin/msedgedriver > /dev/null
+              echo 'echo "EdgeDriver not available"' | sudo tee -a /usr/local/bin/msedgedriver > /dev/null
+              echo 'exit 1' | sudo tee -a /usr/local/bin/msedgedriver > /dev/null
+              sudo chmod +x /usr/local/bin/msedgedriver
             fi
           fi
         else
           echo "Edge not installed, skipping EdgeDriver"
+          # Create dummy driver since Edge is not installed
+          echo '#!/bin/bash' | sudo tee /usr/local/bin/msedgedriver > /dev/null
+          echo 'echo "Edge browser not installed"' | sudo tee -a /usr/local/bin/msedgedriver > /dev/null
+          echo 'exit 1' | sudo tee -a /usr/local/bin/msedgedriver > /dev/null
+          sudo chmod +x /usr/local/bin/msedgedriver
         fi
 
         # Verify installations
